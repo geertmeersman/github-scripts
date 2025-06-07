@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.2.3](https://github.com/geertmeersman/github-scripts/tree/v0.2.3) (2025-06-07)
+
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.2.2...v0.2.3)
+
+**Merged pull requests:**
+
+- fix: Use Gunicorn’s --chdir flag and correct the module path [\#8](https://github.com/geertmeersman/github-scripts/pull/8) ([geertmeersman](https://github.com/geertmeersman))
+
 ## [v0.2.2](https://github.com/geertmeersman/github-scripts/tree/v0.2.2) (2025-06-07)
 
 [Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.2.1...v0.2.2)
