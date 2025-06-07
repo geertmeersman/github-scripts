@@ -5,6 +5,10 @@ services:
     image: geertmeersman/github-scripts
     container_name: github-scripts
     environment:
+      WEB_PORT: 80
+      GITHUB_TOKEN: github_PAT
+      GITHUB_USER: yourgithubuser
+      MERGE_METHOD: squash
       EMAIL_FROM: printer@example.com
       EMAIL_TO: you@example.com
       SMTP_SERVER: smtp.gmail.com
