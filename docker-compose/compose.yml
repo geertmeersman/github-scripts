@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  print-color-test:
+    image: geertmeersman/github-scripts
+    container_name: github-scripts
+    environment:
+      EMAIL_FROM: printer@example.com
+      EMAIL_TO: you@example.com
+      SMTP_SERVER: smtp.gmail.com
+      SMTP_PORT: 587
+      SMTP_USER: printer@example.com
+      SMTP_PWD: your_app_password
+      TELEGRAM_BOT_ID: 123456:ABCDEF
+      TELEGRAM_CHAT_ID: -12345678
+    ports:
+      - "631:631"  # Optional: expose CUPS web interface
+    tty: true
