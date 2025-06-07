@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.2.1](https://github.com/geertmeersman/github-scripts/tree/v0.2.1) (2025-06-07)
+
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.2.0...v0.2.1)
+
+**Merged pull requests:**
+
+- fix: add requests timeout [\#6](https://github.com/geertmeersman/github-scripts/pull/6) ([geertmeersman](https://github.com/geertmeersman))
+- fix: Use Gunicorn’s --chdir flag and correct the module path [\#5](https://github.com/geertmeersman/github-scripts/pull/5) ([geertmeersman](https://github.com/geertmeersman))
+
 ## [v0.2.0](https://github.com/geertmeersman/github-scripts/tree/v0.2.0) (2025-06-07)
 
 [Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.1.0...v0.2.0)
