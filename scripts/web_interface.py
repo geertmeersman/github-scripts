@@ -136,7 +136,7 @@ TEMPLATE = """
                     for (const [name, lines] of Object.entries(data)) {
                         const pre = document.getElementById("log-" + name);
                         if (pre) {
-                            pre.textContent = lines.join('\n');
+                            pre.textContent = lines.join('\\n');
                         }
                     }
                     setTimeout(pollLogs, 3000);

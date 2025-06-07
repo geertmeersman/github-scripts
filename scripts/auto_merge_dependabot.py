@@ -10,7 +10,7 @@ GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 GITHUB_USER = os.getenv("GITHUB_USER")
 MERGE_METHOD = os.getenv("MERGE_METHOD", "squash")
 
-SMTP_HOST = os.getenv("SMTP_HOST")
+SMTP_SERVER = os.getenv("SMTP_SERVER")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
 SMTP_USER = os.getenv("SMTP_USER")
 SMTP_PWD = os.getenv("SMTP_PWD")
@@ -79,7 +79,7 @@ def merge_pr(repo, pr):
         unmerged_prs.append((repo, pr_number, pr_url, error))
 
 def send_email_report():
-    if not all([SMTP_HOST, SMTP_USER, SMTP_PWD, EMAIL_TO]):
+    if not all([SMTP_SERVER, SMTP_USER, SMTP_PWD, EMAIL_TO]):
         print("⚠️ Skipping email: SMTP config missing.")
         return
 
@@ -99,7 +99,7 @@ def send_email_report():
     msg.attach(MIMEText(body, "html"))
 
     try:
-        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
             server.starttls()
             server.login(SMTP_USER, SMTP_PWD)
             server.sendmail(EMAIL_FROM, EMAIL_TO, msg.as_string())
