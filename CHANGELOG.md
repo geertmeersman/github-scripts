@@ -6,6 +6,7 @@
 
 **Merged pull requests:**
 
+- fix: Updated Docker image tagging [\#3](https://github.com/geertmeersman/github-scripts/pull/3) ([geertmeersman](https://github.com/geertmeersman))
 - build\(deps\): bump ruff from 0.11.11 to 0.11.13 [\#2](https://github.com/geertmeersman/github-scripts/pull/2) ([dependabot[bot]](https://github.com/apps/dependabot))
 - build\(deps\): bump docker/build-push-action from 5 to 6 [\#1](https://github.com/geertmeersman/github-scripts/pull/1) ([dependabot[bot]](https://github.com/apps/dependabot))
 
