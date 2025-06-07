@@ -1,22 +1,40 @@
 import os
 import subprocess
 import threading
+import datetime
+import json
 from flask import Flask, jsonify, render_template_string, redirect, url_for, flash, send_file
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "default-secret")
 
-SCRIPTS = {
-    "auto_merge_dependabot": {
-        "path": "/home/auto_merge_dependabot.py",
-        "description": "Automatically merge open Dependabot PRs and notify via email and Telegram.",
-        "args": []
-    },
-}
+SCRIPTS_FILE = "/home/scripts.json"
+
+def load_scripts():
+    try:
+        with open(SCRIPTS_FILE, "r") as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"Error loading scripts: {e}")
+        return {}
+
+SCRIPTS = load_scripts()
 
 execution_status = {name: None for name in SCRIPTS.keys()}
 execution_logs = {name: [] for name in SCRIPTS.keys()}
 script_threads = {}
+run_history = []
+HISTORY_FILE = "/home/script_run_history.json"
+LOG_DIR = "/var/log/github-scripts"
+os.makedirs(LOG_DIR, exist_ok=True)
+
+# Load existing run history from file if it exists
+if os.path.exists(HISTORY_FILE):
+    with open(HISTORY_FILE, "r") as f:
+        try:
+            run_history = json.load(f)
+        except json.JSONDecodeError:
+            run_history = []
 
 TEMPLATE = """
 <!DOCTYPE html>
@@ -93,6 +111,22 @@ TEMPLATE = """
             </div>
             {% endfor %}
         </div>
+        <h3 class=\"mt-4\">Run History</h3>
+        <table class=\"table table-striped\">
+            <thead>
+                <tr><th>Script</th><th>Start</th><th>End</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+                {% for record in run_history[-10:]|reverse %}
+                <tr>
+                    <td>{{ record.script }}</td>
+                    <td>{{ record.start }}</td>
+                    <td>{{ record.end }}</td>
+                    <td>{{ record.status }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
     <script>
         const pollLogs = () => {
@@ -119,6 +153,10 @@ def run_script_with_live_output(script_name):
     execution_status[script_name] = "running"
     execution_logs[script_name] = []
 
+    start_time = datetime.datetime.utcnow().isoformat()
+    end_time = None
+    final_status = "error"
+
     try:
         script = SCRIPTS[script_name]
         process = subprocess.Popen(
@@ -136,11 +174,27 @@ def run_script_with_live_output(script_name):
         process.wait()
         if process.returncode == 0:
             execution_status[script_name] = "success"
+            final_status = "success"
         else:
             execution_status[script_name] = "error"
     except Exception as e:
         execution_logs[script_name].append(f"Exception: {str(e)}")
         execution_status[script_name] = "error"
+    finally:
+        end_time = datetime.datetime.utcnow().isoformat()
+        run_history.append({
+            "script": script_name,
+            "start": start_time,
+            "end": end_time,
+            "status": execution_status[script_name]
+        })
+        with open(HISTORY_FILE, "w") as f:
+            json.dump(run_history, f, indent=2)
+
+        log_filename = f"{script_name}_{start_time.replace(':', '-')}.log"
+        log_path = os.path.join(LOG_DIR, log_filename)
+        with open(log_path, "w") as log_file:
+            log_file.write("\n".join(execution_logs[script_name]))
 
 @app.route("/", methods=["GET"])
 def home():
@@ -148,7 +202,8 @@ def home():
         TEMPLATE,
         scripts=SCRIPTS,
         execution_status=execution_status,
-        execution_logs=execution_logs
+        execution_logs=execution_logs,
+        run_history=run_history
     )
 
 @app.route("/run/<script_name>", methods=["POST"])
