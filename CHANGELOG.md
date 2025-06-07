@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.4.0](https://github.com/geertmeersman/github-scripts/tree/v0.4.0) (2025-06-07)
+
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.3.2...v0.4.0)
+
+**Merged pull requests:**
+
+- feat: consult log history [\#14](https://github.com/geertmeersman/github-scripts/pull/14) ([geertmeersman](https://github.com/geertmeersman))
+
 ## [v0.3.2](https://github.com/geertmeersman/github-scripts/tree/v0.3.2) (2025-06-07)
 
 [Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.3.1...v0.3.2)
