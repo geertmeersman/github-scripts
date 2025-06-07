@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.2.0](https://github.com/geertmeersman/github-scripts/tree/v0.2.0) (2025-06-07)
+
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.1.0...v0.2.0)
+
+**Merged pull requests:**
+
+- feat: Run webapp with gunicorn and improved interface [\#4](https://github.com/geertmeersman/github-scripts/pull/4) ([geertmeersman](https://github.com/geertmeersman))
+
 ## [v0.1.0](https://github.com/geertmeersman/github-scripts/tree/v0.1.0) (2025-06-07)
 
 [Full Changelog](https://github.com/geertmeersman/github-scripts/compare/7e3728931efb3ecfc229c57da43181baf0e95e83...v0.1.0)
