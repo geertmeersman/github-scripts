@@ -4,7 +4,7 @@ FROM python:3.11-slim
 # Install required system packages:
 RUN apt-get update && \
     apt-get install -y cron tzdata vim-tiny curl && \
-    pip install requests cron-descriptor flask && \
+    pip install requests cron-descriptor gunicorn && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Copy Python scripts into container

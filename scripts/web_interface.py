@@ -1,9 +1,10 @@
 import os
-from flask import Flask, request, jsonify, render_template_string
 import subprocess
 import threading
+from flask import Flask, jsonify, render_template_string, redirect, url_for, flash
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "default-secret")
 
 SCRIPTS = {
     "auto_merge_dependabot": {
@@ -11,13 +12,11 @@ SCRIPTS = {
         "description": "Automatically merge open Dependabot PRs and notify via email and Telegram.",
         "args": []
     },
-    # Add more scripts here if needed
 }
 
-# To track execution states
-# States: None (not run), "running", "success", "error"
 execution_status = {name: None for name in SCRIPTS.keys()}
-execution_output = {name: None for name in SCRIPTS.keys()}
+execution_logs = {name: [] for name in SCRIPTS.keys()}
+script_threads = {}
 
 TEMPLATE = """
 <!DOCTYPE html>
@@ -39,23 +38,24 @@ TEMPLATE = """
             max-height: 300px;
             overflow-y: auto;
         }
-        .status-running {
-            color: #0d6efd;
-            font-weight: bold;
-        }
-        .status-success {
-            color: #198754;
-            font-weight: bold;
-        }
-        .status-error {
-            color: #dc3545;
-            font-weight: bold;
-        }
+        .status-running { color: #0d6efd; font-weight: bold; }
+        .status-success { color: #198754; font-weight: bold; }
+        .status-error { color: #dc3545; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1 class="mb-4">GitHub Script Dashboard</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
         <div class="row">
             {% for name, script in scripts.items() %}
             <div class="col-md-6">
@@ -63,7 +63,6 @@ TEMPLATE = """
                     <div class="card-body">
                         <h5 class="card-title">{{ name }}</h5>
                         <p class="card-text">{{ script.description }}</p>
-
                         {% set status = execution_status.get(name) %}
                         {% if status == "running" %}
                             <p>Status: <span class="status-running">Running...</span></p>
@@ -74,46 +73,62 @@ TEMPLATE = """
                         {% else %}
                             <p>Status: <span>Not run</span></p>
                         {% endif %}
-
                         <form method="post" action="/run/{{ name }}">
                             <button class="btn btn-primary" type="submit" {% if status == "running" %}disabled{% endif %}>Run Script</button>
                         </form>
-
-                        {% if execution_output.get(name) %}
                         <div class="output mt-3">
-                            <h6>Output:</h6>
-                            <pre>{{ execution_output[name] }}</pre>
+                            <h6>Live Output:</h6>
+                            <pre id="log-{{ name }}">{{ execution_logs[name]|join('\n') }}</pre>
                         </div>
-                        {% endif %}
                     </div>
                 </div>
             </div>
             {% endfor %}
         </div>
     </div>
+    <script>
+        const pollLogs = () => {
+            fetch("/logs")
+                .then(response => response.json())
+                .then(data => {
+                    for (const [name, lines] of Object.entries(data)) {
+                        const pre = document.getElementById("log-" + name);
+                        if (pre) {
+                            pre.textContent = lines.join("\n");
+                        }
+                    }
+                    setTimeout(pollLogs, 3000);
+                });
+        };
+        pollLogs();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
 """
 
-def run_script_async(script_name):
+def run_script_with_live_output(script_name):
     execution_status[script_name] = "running"
-    execution_output[script_name] = None
+    execution_logs[script_name] = []
+
     try:
         script = SCRIPTS[script_name]
-        result = subprocess.run(
+        process = subprocess.Popen(
             ["python3", script["path"]],
-            capture_output=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
             text=True,
-            timeout=600
+            bufsize=1
         )
-        output = result.stdout + "\n" + result.stderr
-        execution_output[script_name] = output
-        if result.returncode == 0:
+        for line in iter(process.stdout.readline, ''):
+            execution_logs[script_name].append(line.strip())
+        process.wait()
+        if process.returncode == 0:
             execution_status[script_name] = "success"
         else:
             execution_status[script_name] = "error"
     except Exception as e:
-        execution_output[script_name] = f"Exception: {str(e)}"
+        execution_logs[script_name].append(f"Exception: {str(e)}")
         execution_status[script_name] = "error"
 
 @app.route("/", methods=["GET"])
@@ -122,30 +137,30 @@ def home():
         TEMPLATE,
         scripts=SCRIPTS,
         execution_status=execution_status,
-        execution_output=execution_output
+        execution_logs=execution_logs
     )
 
 @app.route("/run/<script_name>", methods=["POST"])
 def run_script(script_name):
     if script_name not in SCRIPTS:
-        return f"<pre>Error: Unknown script '{script_name}'</pre>"
+        flash(f"Error: Unknown script '{script_name}'", "danger")
+        return redirect(url_for("home"))
 
     if execution_status.get(script_name) == "running":
-        return f"<pre>Script '{script_name}' is already running.</pre>"
+        flash(f"Script '{script_name}' is already running.", "warning")
+        return redirect(url_for("home"))
 
-    # Run asynchronously so the UI doesn’t block
-    thread = threading.Thread(target=run_script_async, args=(script_name,))
+    thread = threading.Thread(target=run_script_with_live_output, args=(script_name,))
     thread.start()
+    script_threads[script_name] = thread
 
-    return (
-        f"<html><body><p>Started script <b>{script_name}</b>. "
-        f"Please refresh the <a href='/'>dashboard</a> to see status and output.</p></body></html>"
-    )
+    flash(f"Started script '{script_name}'.", "info")
+    return redirect(url_for("home"))
+
+@app.route("/logs", methods=["GET"])
+def logs():
+    return jsonify(execution_logs)
 
 @app.route("/health")
 def health():
     return jsonify(status="ok")
-
-if __name__ == "__main__":
-    port = int(os.getenv("WEB_PORT", "80"))
-    app.run(host="0.0.0.0", port=port)
