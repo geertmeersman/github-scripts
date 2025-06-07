@@ -112,21 +112,37 @@ TEMPLATE = """
             {% endfor %}
         </div>
         <h3 class=\"mt-4\">Run History</h3>
-        <table class=\"table table-striped\">
-            <thead>
-                <tr><th>Script</th><th>Start</th><th>End</th><th>Status</th></tr>
-            </thead>
-            <tbody>
-                {% for record in run_history[-10:]|reverse %}
-                <tr>
-                    <td>{{ record.script }}</td>
-                    <td>{{ record.start }}</td>
-                    <td>{{ record.end }}</td>
-                    <td>{{ record.status }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div style="max-height: 300px; overflow-y: auto;">
+            <table class=\"table table-striped\">
+                <thead>
+                    <tr><th>Script</th><th>Start</th><th>End</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                    {% for record in run_history[-10:]|reverse %}
+                    <tr role="button" class="run-history-row" data-logfile="{{ record.log_file }}">
+                        <td>{{ record.script }}</td>
+                        <td>{{ record.start }}</td>
+                        <td>{{ record.end }}</td>
+                        <td>{{ record.status }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="runHistoryModal" tabindex="-1" aria-labelledby="runHistoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="runHistoryModalLabel">Run Details</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <pre id="runHistoryDetails" style="white-space: pre-wrap;"></pre>
+        </div>
+        </div>
+    </div>
     </div>
     <script>
         const pollLogs = () => {
@@ -143,6 +159,26 @@ TEMPLATE = """
                 });
         };
         pollLogs();
+    </script>
+    <script>
+    document.querySelectorAll(".run-history-row").forEach(row => {
+        row.addEventListener("click", () => {
+        const logFile = row.getAttribute("data-logfile");
+        fetch(`/logfile/${logFile}`)
+            .then(res => res.json())
+            .then(data => {
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+            const pre = document.getElementById("runHistoryDetails");
+            pre.textContent = data.content || "(No log content)";
+            const modal = new bootstrap.Modal(document.getElementById("runHistoryModal"));
+            modal.show();
+            })
+            .catch(err => alert("Failed to load log: " + err));
+        });
+    });
     </script>
     <script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js\"></script>
 </body>
@@ -180,19 +216,20 @@ def run_script_with_live_output(script_name):
         execution_status[script_name] = "error"
     finally:
         end_time = datetime.datetime.utcnow().isoformat()
-        run_history.append({
-            "script": script_name,
-            "start": start_time,
-            "end": end_time,
-            "status": execution_status[script_name]
-        })
-        with open(HISTORY_FILE, "w") as f:
-            json.dump(run_history, f, indent=2)
-
         log_filename = f"{script_name}_{start_time.replace(':', '-')}.log"
         log_path = os.path.join(LOG_DIR, log_filename)
         with open(log_path, "w") as log_file:
             log_file.write("\n".join(execution_logs[script_name]))
+
+        run_history.append({
+            "script": script_name,
+            "start": start_time,
+            "end": end_time,
+            "status": execution_status[script_name],
+            "log_file": log_filename
+        })
+        with open(HISTORY_FILE, "w") as f:
+            json.dump(run_history, f, indent=2)
 
 @app.route("/", methods=["GET"])
 def home():
@@ -245,6 +282,16 @@ def download_script(script_name):
         return "Script not found", 404
     path = SCRIPTS[script_name]["path"]
     return send_file(path, as_attachment=True)
+
+@app.route("/logfile/<log_filename>")
+def get_logfile(log_filename):
+    safe_filename = os.path.basename(log_filename)  # avoid path traversal
+    log_path = os.path.join(LOG_DIR, safe_filename)
+    if not os.path.exists(log_path):
+        return jsonify({"error": "Log file not found"}), 404
+    with open(log_path, "r") as f:
+        content = f.read()
+    return jsonify({"content": content})
 
 @app.route("/health")
 def health():
