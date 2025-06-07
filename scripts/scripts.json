@@ -1,0 +1,6 @@
+{
+  "auto_merge_dependabot": {
+    "path": "/home/auto_merge_dependabot.py",
+    "description": "Automatically merge open Dependabot PRs and notify via email and Telegram.",
+    "args": []
+  }}
