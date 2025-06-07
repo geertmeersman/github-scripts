@@ -24,9 +24,9 @@ execution_status = {name: None for name in SCRIPTS.keys()}
 execution_logs = {name: [] for name in SCRIPTS.keys()}
 script_threads = {}
 run_history = []
-HISTORY_FILE = "/home/script_run_history.json"
 LOG_DIR = "/var/log/github-scripts"
 os.makedirs(LOG_DIR, exist_ok=True)
+HISTORY_FILE = f"{LOG_DIR}/script_run_history.json"
 
 # Load existing run history from file if it exists
 if os.path.exists(HISTORY_FILE):
@@ -136,7 +136,7 @@ TEMPLATE = """
                     for (const [name, lines] of Object.entries(data)) {
                         const pre = document.getElementById("log-" + name);
                         if (pre) {
-                            pre.textContent = lines.join("\n");
+                            pre.textContent = lines.join('\n');
                         }
                     }
                     setTimeout(pollLogs, 3000);
@@ -155,7 +155,6 @@ def run_script_with_live_output(script_name):
 
     start_time = datetime.datetime.utcnow().isoformat()
     end_time = None
-    final_status = "error"
 
     try:
         script = SCRIPTS[script_name]
@@ -174,7 +173,6 @@ def run_script_with_live_output(script_name):
         process.wait()
         if process.returncode == 0:
             execution_status[script_name] = "success"
-            final_status = "success"
         else:
             execution_status[script_name] = "error"
     except Exception as e:
