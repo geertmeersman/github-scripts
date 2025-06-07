@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.5.0](https://github.com/geertmeersman/github-scripts/tree/v0.5.0) (2025-06-07)
+
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.4.2...v0.5.0)
+
+**Merged pull requests:**
+
+- feat: sockets for log fetching [\#17](https://github.com/geertmeersman/github-scripts/pull/17) ([geertmeersman](https://github.com/geertmeersman))
+
 ## [v0.4.2](https://github.com/geertmeersman/github-scripts/tree/v0.4.2) (2025-06-07)
 
 [Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.4.1...v0.4.2)
