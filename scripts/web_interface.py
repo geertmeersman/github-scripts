@@ -3,7 +3,7 @@ import subprocess
 import threading
 import datetime
 import json
-from flask import Flask, jsonify, render_template_string, redirect, url_for, flash, send_file
+from flask import Flask, jsonify, render_template_string, redirect, url_for, flash, send_file, request
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "default-secret")
@@ -111,24 +111,18 @@ TEMPLATE = """
             </div>
             {% endfor %}
         </div>
-        <h3 class=\"mt-4\">Run History</h3>
-        <div style="max-height: 300px; overflow-y: auto;">
-            <table class=\"table table-striped\">
+        <h3 class="mt-4">Run History</h3>
+        <div class="table-responsive">
+            <table class="table table-striped">
                 <thead>
                     <tr><th>Script</th><th>Start</th><th>End</th><th>Status</th></tr>
                 </thead>
-                <tbody>
-                    {% for record in run_history[-10:]|reverse %}
-                    <tr role="button" class="run-history-row" data-logfile="{{ record.log_file }}">
-                        <td>{{ record.script }}</td>
-                        <td>{{ record.start }}</td>
-                        <td>{{ record.end }}</td>
-                        <td>{{ record.status }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
+                <tbody id="run-history-body"></tbody>
             </table>
         </div>
+        <nav>
+            <ul class="pagination" id="history-pagination"></ul>
+        </nav>
     </div>
     <!-- Modal -->
     <div class="modal fade" id="runHistoryModal" tabindex="-1" aria-labelledby="runHistoryModalLabel" aria-hidden="true">
@@ -159,6 +153,47 @@ TEMPLATE = """
                 });
         };
         pollLogs();
+    </script>
+    <script>
+        let currentPage = 1;
+        const perPage = 10;
+
+        function loadHistoryPage(page) {
+            fetch(`/history?page=${page}&per_page=${perPage}`)
+                .then(response => response.json())
+                .then(data => {
+                    const tbody = document.getElementById("run-history-body");
+                    tbody.innerHTML = "";
+                    for (const record of data.records) {
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                            <td>${record.script}</td>
+                            <td>${new Date(record.start).toLocaleString()}</td>
+                            <td>${new Date(record.end).toLocaleString()}</td>
+                            <td>${record.status}</td>
+                        `;
+                        tbody.appendChild(row);
+                    }
+
+                    const pagination = document.getElementById("history-pagination");
+                    pagination.innerHTML = "";
+
+                    for (let i = 1; i <= data.pages; i++) {
+                        const li = document.createElement("li");
+                        li.className = `page-item ${i === data.page ? 'active' : ''}`;
+                        li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                        li.onclick = (e) => {
+                            e.preventDefault();
+                            currentPage = i;
+                            loadHistoryPage(i);
+                        };
+                        pagination.appendChild(li);
+                    }
+                });
+        }
+
+        setInterval(() => loadHistoryPage(currentPage), 5000); // auto refresh
+        loadHistoryPage(currentPage); // initial load
     </script>
     <script>
     document.querySelectorAll(".run-history-row").forEach(row => {
@@ -195,7 +230,7 @@ def run_script_with_live_output(script_name):
     try:
         script = SCRIPTS[script_name]
         process = subprocess.Popen(
-            ["python3", "-u", script["path"]],
+            ["/usr/bin/python3", "-u", script["path"]],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
@@ -292,6 +327,28 @@ def get_logfile(log_filename):
     with open(log_path, "r") as f:
         content = f.read()
     return jsonify({"content": content})
+
+
+@app.route("/history")
+def get_history():
+    try:
+        page = int(request.args.get("page", 1))
+        per_page = int(request.args.get("per_page", 10))
+    except ValueError:
+        page, per_page = 1, 10
+
+    start = (page - 1) * per_page
+    end = start + per_page
+    total = len(run_history)
+
+    return jsonify({
+        "records": run_history[::-1][start:end],
+        "page": page,
+        "per_page": per_page,
+        "total": total,
+        "pages": (total + per_page - 1) // per_page,
+    })
+
 
 @app.route("/health")
 def health():
