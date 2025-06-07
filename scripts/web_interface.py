@@ -189,7 +189,7 @@ def run_script_with_live_output(script_name):
     execution_status[script_name] = "running"
     execution_logs[script_name] = []
 
-    start_time = datetime.datetime.utcnow().isoformat()
+    start_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     end_time = None
 
     try:
@@ -215,7 +215,7 @@ def run_script_with_live_output(script_name):
         execution_logs[script_name].append(f"Exception: {str(e)}")
         execution_status[script_name] = "error"
     finally:
-        end_time = datetime.datetime.utcnow().isoformat()
+        end_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         log_filename = f"{script_name}_{start_time.replace(':', '-')}.log"
         log_path = os.path.join(LOG_DIR, log_filename)
         with open(log_path, "w") as log_file:
