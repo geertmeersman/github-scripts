@@ -155,7 +155,6 @@ def run_script_with_live_output(script_name):
 
     start_time = datetime.datetime.utcnow().isoformat()
     end_time = None
-    final_status = "error"
 
     try:
         script = SCRIPTS[script_name]
@@ -174,7 +173,6 @@ def run_script_with_live_output(script_name):
         process.wait()
         if process.returncode == 0:
             execution_status[script_name] = "success"
-            final_status = "success"
         else:
             execution_status[script_name] = "error"
     except Exception as e:
