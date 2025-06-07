@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.3.0](https://github.com/geertmeersman/github-scripts/tree/v0.3.0) (2025-06-07)
+
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.2.5...v0.3.0)
+
+**Merged pull requests:**
+
+- fix: delimiter for lines in web interface logs [\#11](https://github.com/geertmeersman/github-scripts/pull/11) ([geertmeersman](https://github.com/geertmeersman))
+
 ## [v0.2.5](https://github.com/geertmeersman/github-scripts/tree/v0.2.5) (2025-06-07)
 
 [Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.2.4...v0.2.5)
