@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.2.4](https://github.com/geertmeersman/github-scripts/tree/v0.2.4) (2025-06-07)
+
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.2.3...v0.2.4)
+
+**Merged pull requests:**
+
+- fix: install flask module [\#9](https://github.com/geertmeersman/github-scripts/pull/9) ([geertmeersman](https://github.com/geertmeersman))
+
 ## [v0.2.3](https://github.com/geertmeersman/github-scripts/tree/v0.2.3) (2025-06-07)
 
 [Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.2.2...v0.2.3)
