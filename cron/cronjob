@@ -9,4 +9,4 @@ SHELL=/bin/bash
 # │ │ │ │ ┌───────────── day of the week (0 - 6) (Sunday to Saturday)
 # │ │ │ │ │
 # │ │ │ │ │
-  0 2 * * * python3 /home/auto_merge_dependabot.py >>  /proc/1/fd/1 2>&1
+  0 2 * * * python3 /home/cron_wrapper.py auto_merge_dependabot /home/auto_merge_dependabot.py >> /var/log/github-scripts/auto_merge_dependabot_cron.log 2>&1
