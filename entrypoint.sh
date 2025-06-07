@@ -45,6 +45,7 @@ python3 /home/describe_cron.py
 WEB_PORT="${WEB_PORT:-80}"
 echo "[INFO] Starting Flask app on port $WEB_PORT with Gunicorn..."
 
+cd /home
 exec gunicorn --bind 0.0.0.0:$WEB_PORT web_interface:app
 
 # Optional: keep container running to troubleshoot, or exit
