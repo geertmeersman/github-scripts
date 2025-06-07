@@ -8,6 +8,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -26,9 +27,7 @@ jobs:
       - name: 🔄　Update version in 'VERSION' and push changes
         env:
           tag_name: ${{ steps.release_drafter.outputs.tag_name }}
-          GITHUB_REPO: ${{ github.event.repository.name }}
-        run: |
-          echo $tag_name > VERSION
+        run: echo "$tag_name" > VERSION
 
       - name: 📝　Publish release
         uses: release-drafter/release-drafter@v6
@@ -38,7 +37,7 @@ jobs:
         with:
           publish: true
 
-      - name: "✏️　Generate release changelog"
+      - name: ✏️　Generate release changelog
         uses: heinrichreimer/github-changelog-generator-action@v2.4
         with:
           token: ${{ secrets.GH_PAT }}
@@ -63,11 +62,11 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push
+      - name: 🚀 Build and push Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           tags: |
-            geertmeersman/print-color-test:latest
-            geertmeersman/print-color-test:${{ steps.release_drafter.outputs.tag_name }}
+            ${{ github.repository }}:latest
+            ${{ github.repository }}:${{ steps.release_drafter.outputs.tag_name }}
