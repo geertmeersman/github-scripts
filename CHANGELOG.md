@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.3.1](https://github.com/geertmeersman/github-scripts/tree/v0.3.1) (2025-06-07)
+
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.3.0...v0.3.1)
+
+**Merged pull requests:**
+
+- fix: EOL for crontab [\#12](https://github.com/geertmeersman/github-scripts/pull/12) ([geertmeersman](https://github.com/geertmeersman))
+
 ## [v0.3.0](https://github.com/geertmeersman/github-scripts/tree/v0.3.0) (2025-06-07)
 
 [Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.2.5...v0.3.0)
