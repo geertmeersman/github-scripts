@@ -230,7 +230,7 @@ def run_script_with_live_output(script_name):
     try:
         script = SCRIPTS[script_name]
         process = subprocess.Popen(
-            ["python3", "-u", script["path"]],
+            ["/usr/bin/python3", "-u", script["path"]],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
