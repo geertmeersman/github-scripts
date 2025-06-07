@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.2.5](https://github.com/geertmeersman/github-scripts/tree/v0.2.5) (2025-06-07)
+
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.2.4...v0.2.5)
+
+**Merged pull requests:**
+
+- fix: improved web interface [\#10](https://github.com/geertmeersman/github-scripts/pull/10) ([geertmeersman](https://github.com/geertmeersman))
+
 ## [v0.2.4](https://github.com/geertmeersman/github-scripts/tree/v0.2.4) (2025-06-07)
 
 [Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.2.3...v0.2.4)
