@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.4.2](https://github.com/geertmeersman/github-scripts/tree/v0.4.2) (2025-06-07)
+
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.4.1...v0.4.2)
+
+**Merged pull requests:**
+
+- fix: improve cron wrapper [\#16](https://github.com/geertmeersman/github-scripts/pull/16) ([geertmeersman](https://github.com/geertmeersman))
+
 ## [v0.4.1](https://github.com/geertmeersman/github-scripts/tree/v0.4.1) (2025-06-07)
 
 [Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.4.0...v0.4.1)
