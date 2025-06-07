@@ -25,9 +25,9 @@ execution_status = {name: None for name in SCRIPTS.keys()}
 execution_logs = {name: [] for name in SCRIPTS.keys()}
 script_threads = {}
 run_history = []
-HISTORY_FILE = "/home/script_run_history.json"
 LOG_DIR = "/var/log/github-scripts"
 os.makedirs(LOG_DIR, exist_ok=True)
+HISTORY_FILE = f"${LOG_DIR}/script_run_history.json"
 
 # Load existing run history from file if it exists
 if os.path.exists(HISTORY_FILE):
