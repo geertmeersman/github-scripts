@@ -21,6 +21,8 @@ TELEGRAM_BOT_ID = os.getenv("TELEGRAM_BOT_ID")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 TELEGRAM_WEBHOOK = f"https://api.telegram.org/bot{TELEGRAM_BOT_ID}/sendMessage" if TELEGRAM_BOT_ID else None
 
+REQUESTS_TIMEOUT = 10
+
 HEADERS = {
     "Authorization": f"token {GITHUB_TOKEN}",
     "Accept": "application/vnd.github.v3+json"
@@ -33,7 +35,7 @@ def get_repos():
     page = 1
     while True:
         url = f'https://api.github.com/user/repos?per_page=100&page={page}'
-        response = requests.get(url, headers=HEADERS)
+        response = requests.get(url, headers=HEADERS, timeout=REQUESTS_TIMEOUT)
         if response.status_code != 200:
             print("❌ Failed to fetch repos")
             break
@@ -46,7 +48,7 @@ def get_repos():
 
 def get_dependabot_prs(repo):
     url = f"https://api.github.com/repos/{repo}/pulls?state=open"
-    response = requests.get(url, headers=HEADERS)
+    response = requests.get(url, headers=HEADERS, timeout=REQUESTS_TIMEOUT)
     if response.status_code != 200:
         print(f"❌ Failed to fetch PRs for {repo}")
         return []
@@ -57,7 +59,7 @@ def merge_pr(repo, pr):
     pr_url = pr['html_url']
     print(f"🔄 Attempting to merge PR #{pr_number} in {repo}")
 
-    details = requests.get(f"https://api.github.com/repos/{repo}/pulls/{pr_number}", headers=HEADERS).json()
+    details = requests.get(f"https://api.github.com/repos/{repo}/pulls/{pr_number}", headers=HEADERS, timeout=REQUESTS_TIMEOUT).json()
     if details.get('mergeable') is not True:
         print(f"⏭️ PR #{pr_number} is not mergeable yet")
         unmerged_prs.append((repo, pr_number, pr_url, "Not mergeable"))
@@ -68,7 +70,7 @@ def merge_pr(repo, pr):
         "merge_method": MERGE_METHOD,
         "commit_title": f"Auto-merge PR #{pr_number} from Dependabot"
     }
-    response = requests.put(url, headers=HEADERS, json=data)
+    response = requests.put(url, headers=HEADERS, json=data, timeout=REQUESTS_TIMEOUT)
     if response.status_code == 200:
         print(f"✅ Merged PR #{pr_number} in {repo}")
     else:
@@ -125,7 +127,7 @@ def send_telegram_report():
             "parse_mode": "Markdown",
             "disable_web_page_preview": True
         }
-        response = requests.post(TELEGRAM_WEBHOOK, json=payload, timeout=10)
+        response = requests.post(TELEGRAM_WEBHOOK, json=payload, timeout=REQUESTS_TIMEOUT)
         if response.status_code == 200:
             print("📨 Telegram notification sent.")
         else:
