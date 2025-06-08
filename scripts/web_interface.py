@@ -323,8 +323,8 @@ def download_script(script_name):
 @app.route("/logfile/<log_filename>")
 def get_logfile(log_filename):
     safe_filename = os.path.basename(log_filename)  # avoid path traversal
-    log_path = os.path.join(LOG_DIR, safe_filename)
-    if not os.path.exists(log_path):
+    log_path = os.path.normpath(os.path.join(LOG_DIR, safe_filename))
+    if not log_path.startswith(LOG_DIR) or not os.path.exists(log_path):
         return jsonify({"error": "Log file not found"}), 404
     with open(log_path, "r") as f:
         content = f.read()
