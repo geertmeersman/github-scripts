@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.5.9](https://github.com/geertmeersman/github-scripts/tree/v0.5.9) (2025-06-08)
+
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.5.8...v0.5.9)
+
+**Merged pull requests:**
+
+- chore: date format [\#25](https://github.com/geertmeersman/github-scripts/pull/25) ([geertmeersman](https://github.com/geertmeersman))
+
 ## [v0.5.8](https://github.com/geertmeersman/github-scripts/tree/v0.5.8) (2025-06-08)
 
 [Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.5.7...v0.5.8)
@@ -27,19 +35,19 @@
 
 ## [v0.5.5](https://github.com/geertmeersman/github-scripts/tree/v0.5.5) (2025-06-08)
 
-[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.5.3...v0.5.5)
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.5.4...v0.5.5)
 
 **Merged pull requests:**
 
 - fix: eventlet for websocket [\#20](https://github.com/geertmeersman/github-scripts/pull/20) ([geertmeersman](https://github.com/geertmeersman))
 
-## [v0.5.3](https://github.com/geertmeersman/github-scripts/tree/v0.5.3) (2025-06-08)
-
-[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.5.4...v0.5.3)
-
 ## [v0.5.4](https://github.com/geertmeersman/github-scripts/tree/v0.5.4) (2025-06-08)
 
-[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.5.2...v0.5.4)
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.5.3...v0.5.4)
+
+## [v0.5.3](https://github.com/geertmeersman/github-scripts/tree/v0.5.3) (2025-06-08)
+
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.5.2...v0.5.3)
 
 ## [v0.5.2](https://github.com/geertmeersman/github-scripts/tree/v0.5.2) (2025-06-08)
 
