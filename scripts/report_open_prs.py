@@ -15,6 +15,8 @@ SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
 SMTP_USER = os.getenv("SMTP_USER")
 SMTP_PWD = os.getenv("SMTP_PWD")
 
+REQUESTS_TIMEOUT = 10
+
 if not all([GITHUB_USER, GITHUB_TOKEN, EMAIL_FROM, EMAIL_TO, SMTP_SERVER, SMTP_USER, SMTP_PWD]):
     raise ValueError("❌ Missing one or more required environment variables.")
 
@@ -25,7 +27,7 @@ HEADERS = {
 
 def search_prs(query):
     url = f"https://api.github.com/search/issues?q={query}&per_page=100"
-    response = requests.get(url, headers=HEADERS)
+    response = requests.get(url, headers=HEADERS, timeout=REQUESTS_TIMEOUT)
     response.raise_for_status()
     return response.json().get("items", [])
 
