@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.7.1](https://github.com/geertmeersman/github-scripts/tree/v0.7.1) (2025-06-08)
+
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.7.0...v0.7.1)
+
+**Merged pull requests:**
+
+- chore: Updated the container to include an additional reporting script for enhanced functionality. [\#28](https://github.com/geertmeersman/github-scripts/pull/28) ([geertmeersman](https://github.com/geertmeersman))
+
 ## [v0.7.0](https://github.com/geertmeersman/github-scripts/tree/v0.7.0) (2025-06-08)
 
 [Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.6.0...v0.7.0)
