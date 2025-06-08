@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.5.8](https://github.com/geertmeersman/github-scripts/tree/v0.5.8) (2025-06-08)
+
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.5.7...v0.5.8)
+
+**Merged pull requests:**
+
+- chore: improve socket actions [\#24](https://github.com/geertmeersman/github-scripts/pull/24) ([geertmeersman](https://github.com/geertmeersman))
+
 ## [v0.5.7](https://github.com/geertmeersman/github-scripts/tree/v0.5.7) (2025-06-08)
 
 [Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.5.6...v0.5.7)
