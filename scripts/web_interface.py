@@ -17,6 +17,14 @@ socketio = SocketIO(
     )
 )
 
+def read_version():
+    try:
+        with open("/VERSION", "r") as f:
+            return f.read().strip()
+    except Exception as e:
+        print(f"Error reading VERSION file: {e}")
+        return "Unknown"
+
 SCRIPTS_FILE = "/home/scripts.json"
 
 def load_scripts():
@@ -53,8 +61,19 @@ TEMPLATE = """
     <title>GitHub Script Dashboard</title>
     <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css\" rel=\"stylesheet\">
     <style>
-        body { padding: 2rem; background: #f8f9fa; }
+        body {
+            padding: 2rem;
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            flex: 1;
+        }
         .card { margin-bottom: 1rem; }
+
         .output pre {
             background: #212529;
             color: #f8f9fa;
@@ -65,15 +84,39 @@ TEMPLATE = """
             max-height: 300px;
             overflow-y: auto;
         }
+
         .status-running { color: #0d6efd; font-weight: bold; }
         .status-success { color: #198754; font-weight: bold; }
         .status-error { color: #dc3545; font-weight: bold; }
-        #toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 9999; }
+
+        #toast-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 9999;
+        }
+
+        .footer {
+            background: #e9ecef;
+            text-align: center;
+            padding: 0.75rem;
+            font-size: 0.85rem;
+            color: #6c757d;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .header-title img {
+            vertical-align: middle;
+            margin-right: 0.5rem;
+        }
     </style>
 </head>
 <body>
     <div class=\"container\">
-        <h1 class=\"mb-4\">GitHub Script Dashboard</h1>
+        <h1 class="mb-4 header-title">
+            <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub" width="32" height="32">
+            GitHub Script Dashboard
+        </h1>        
         <div class="mb-3">
             <span id="ws-status" class="badge bg-secondary">WebSocket: Connecting...</span>
         </div>
@@ -168,16 +211,21 @@ TEMPLATE = """
         socket.on("connect", () => {
             console.log("✅ Socket.IO connected");
             setWsStatus("Connected", "success");
+            // 🔥 Remove the disconnect toast if it exists
+            const lostToast = document.getElementById("ws-disconnect-toast");
+            if (lostToast) lostToast.remove();            
         });
 
         socket.on("disconnect", (reason) => {
             console.warn("⚠️ Socket.IO disconnected:", reason);
             setWsStatus("Disconnected", "danger")
+            const toastId = "ws-disconnect-toast";
             const toast = document.createElement("div");
+            toast.id = toastId; // ← add ID
             toast.className = "toast align-items-center text-white bg-danger border-0 show";
             toast.innerHTML = `
                 <div class="d-flex">
-                <div class="toast-body">⚠️ Connection lost. Trying to reconnect...</div>
+                    <div class="toast-body">⚠️ Connection lost. Trying to reconnect...</div>
                 </div>
             `;
             document.getElementById("toast-container").appendChild(toast);
@@ -296,34 +344,27 @@ TEMPLATE = """
                         };
                         pagination.appendChild(li);
                     }
+
+                    // ✅ Re-bind clicks **after** DOM update
+                    bindHistoryRowClicks();
                 });
-            bindHistoryRowClicks(); // reattach clicks to new rows
         }
 
         setInterval(() => loadHistoryPage(currentPage), 5000); // auto refresh
         loadHistoryPage(currentPage); // initial load
     </script>
-    <script>
-    document.querySelectorAll(".run-history-row").forEach(row => {
-        row.addEventListener("click", () => {
-        const logFile = row.getAttribute("data-logfile");
-        fetch(`/logfile/${logFile}`)
-            .then(res => res.json())
-            .then(data => {
-            if (data.error) {
-                alert(data.error);
-                return;
-            }
-            const pre = document.getElementById("runHistoryDetails");
-            pre.textContent = data.content || "(No log content)";
-            const modal = new bootstrap.Modal(document.getElementById("runHistoryModal"));
-            modal.show();
-            })
-            .catch(err => alert("Failed to load log: " + err));
-        });
-    });
-    </script>
     <script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js\"></script>
+    <footer class="footer">
+        <div>
+            Version: <code>{{ version }}</code> &nbsp;|&nbsp;
+            <a href="https://github.com/geertmeersman/github-scripts" target="_blank" style="color: #6c757d; text-decoration: none;">
+                View on GitHub
+            </a>
+        </div>
+        <div style="margin-top: 0.25rem;">
+            &copy; {{ now.year }} Geert Meersman
+        </div>
+    </footer>
 </body>
 </html>
 """
@@ -383,12 +424,14 @@ def run_script_with_live_output(script_name):
 
 @app.route("/", methods=["GET"])
 def home():
+    version = read_version()
     return render_template_string(
         TEMPLATE,
         scripts=SCRIPTS,
         execution_status=execution_status,
         execution_logs=execution_logs,
-        run_history=run_history
+        run_history=run_history,
+        version=version
     )
 
 @app.route("/run/<script_name>", methods=["POST"])
