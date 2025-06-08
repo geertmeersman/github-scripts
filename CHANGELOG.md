@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.5.5](https://github.com/geertmeersman/github-scripts/tree/v0.5.5) (2025-06-08)
+
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.5.4...v0.5.5)
+
+**Merged pull requests:**
+
+- fix: eventlet for websocket [\#20](https://github.com/geertmeersman/github-scripts/pull/20) ([geertmeersman](https://github.com/geertmeersman))
+
 ## [v0.5.4](https://github.com/geertmeersman/github-scripts/tree/v0.5.4) (2025-06-08)
 
 [Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.5.3...v0.5.4)
