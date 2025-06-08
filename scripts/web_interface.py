@@ -202,7 +202,7 @@ TEMPLATE = """
                         row.innerHTML = `
                             <td>${record.script}</td>
                             <td>${record.start}</td>
-                            <td>${record.end)}</td>
+                            <td>${record.end}</td>
                             <td>${record.status}</td>
                         `;
                         tbody.appendChild(row);
