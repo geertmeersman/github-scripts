@@ -148,14 +148,46 @@ TEMPLATE = """
 
     <script src=\"https://cdn.socket.io/4.7.2/socket.io.min.js\"></script>
     <script>
-      const socket = io();
-      socket.on("log_update", (data) => {
-        const pre = document.getElementById("log-" + data.script);
-        if (pre) {
-          pre.textContent += data.line + "\\n";
-          pre.scrollTop = pre.scrollHeight;
+        const socket = io();
+        socket.on("log_update", (data) => {
+            const pre = document.getElementById("log-" + data.script);
+            if (pre) {
+            pre.textContent += data.line + "\\n";
+            pre.scrollTop = pre.scrollHeight;
+            }
+        });
+        socket.on("status_update", (data) => {
+        const titleElements = Array.from(document.querySelectorAll(".card-title"));
+        for (const titleEl of titleElements) {
+            if (titleEl.textContent.trim() === data.script) {
+            const card = titleEl.closest(".card");
+            const statusSpan = card.querySelector("p span");
+
+            if (statusSpan) {
+                if (data.status === "running") {
+                statusSpan.className = "status-running";
+                statusSpan.textContent = "Running...";
+                } else if (data.status === "success") {
+                statusSpan.className = "status-success";
+                statusSpan.textContent = "Success ✔";
+                } else if (data.status === "error") {
+                statusSpan.className = "status-error";
+                statusSpan.textContent = "Error ✘";
+                }
+            }
+
+            // Enable or disable buttons accordingly
+            const runButton = card.querySelector("form[action^='/run/'] button");
+            const cancelForm = card.querySelector("form[action^='/cancel/']");
+            if (runButton) runButton.disabled = (data.status === "running");
+
+            if (cancelForm) {
+                cancelForm.style.display = (data.status === "running") ? "block" : "none";
+            }
+            }
         }
-      });
+        });
+
         let currentPage = 1;
         const perPage = 10;
 
@@ -224,6 +256,7 @@ TEMPLATE = """
 def run_script_with_live_output(script_name):
     execution_status[script_name] = "running"
     execution_logs[script_name] = []
+    socketio.emit("status_update", {"script": script_name, "status": "running"})  # ← NEW
 
     start_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     end_time = None
@@ -248,11 +281,14 @@ def run_script_with_live_output(script_name):
         process.wait()
         if process.returncode == 0:
             execution_status[script_name] = "success"
+            socketio.emit("status_update", {"script": script_name, "status": "success"})  # ← NEW
         else:
             execution_status[script_name] = "error"
+            socketio.emit("status_update", {"script": script_name, "status": "error"})  # ← NEW
     except Exception as e:
         execution_logs[script_name].append(f"Exception: {str(e)}")
         execution_status[script_name] = "error"
+        socketio.emit("status_update", {"script": script_name, "status": "error"})  # ← NEW
     finally:
         end_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         log_filename = f"{script_name}_{start_time.replace(':', '-')}.log"
@@ -266,7 +302,6 @@ def run_script_with_live_output(script_name):
         with open(HISTORY_FILE, "w") as f:
             json.dump(run_history, f, indent=2)
 
-        log_filename = f"{script_name}_{start_time.replace(':', '-')}.log"
         log_path = os.path.join(LOG_DIR, log_filename)
         with open(log_path, "w") as log_file:
             log_file.write("\n".join(execution_logs[script_name]))
@@ -305,6 +340,7 @@ def cancel_script(script_name):
             process.terminate()
             execution_status[script_name] = "error"
             execution_logs[script_name].append("Script was aborted by user.")
+            socketio.emit("status_update", {"script": script_name, "status": "error"})  # ← NEW
             flash(f"Aborted script '{script_name}'.", "warning")
         else:
             flash(f"Script '{script_name}' already finished.", "info")
