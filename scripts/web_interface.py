@@ -148,7 +148,38 @@ TEMPLATE = """
 
     <script src=\"https://cdn.socket.io/4.7.2/socket.io.min.js\"></script>
     <script>
-        const socket = io();
+        const socket = io({
+            reconnection: true,
+            reconnectionAttempts: 10,      // try 10 times
+            reconnectionDelay: 1000,       // wait 1 second before trying to reconnect
+            reconnectionDelayMax: 5000,    // max 5 seconds delay between attempts
+            timeout: 20000,                // connection timeout
+        });
+
+        socket.on("connect", () => {
+            console.log("✅ Socket.IO connected");
+        });
+
+        socket.on("disconnect", (reason) => {
+            console.warn("⚠️ Socket.IO disconnected:", reason);
+            const toast = document.createElement("div");
+            toast.className = "toast align-items-center text-white bg-danger border-0 show";
+            toast.innerHTML = `
+                <div class="d-flex">
+                <div class="toast-body">⚠️ Connection lost. Trying to reconnect...</div>
+                </div>
+            `;
+            document.getElementById("toast-container").appendChild(toast);
+        });
+
+        socket.on("reconnect_attempt", (attempt) => {
+            console.log(`🔁 Reconnect attempt ${attempt}`);
+        });
+
+        socket.on("reconnect_failed", () => {
+            console.error("❌ Socket.IO failed to reconnect after max attempts");
+        });
+
         socket.on("log_update", (data) => {
             const pre = document.getElementById("log-" + data.script);
             if (pre) {
