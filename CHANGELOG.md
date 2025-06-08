@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.5.6](https://github.com/geertmeersman/github-scripts/tree/v0.5.6) (2025-06-08)
+
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.5.5...v0.5.6)
+
+**Merged pull requests:**
+
+- fix: CORS\_ALLOWED\_ORIGINS fix [\#22](https://github.com/geertmeersman/github-scripts/pull/22) ([geertmeersman](https://github.com/geertmeersman))
+- fix: add cors\_allowed\_origins [\#21](https://github.com/geertmeersman/github-scripts/pull/21) ([geertmeersman](https://github.com/geertmeersman))
+
 ## [v0.5.5](https://github.com/geertmeersman/github-scripts/tree/v0.5.5) (2025-06-08)
 
 [Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.5.4...v0.5.5)
