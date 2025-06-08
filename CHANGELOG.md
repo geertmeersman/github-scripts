@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.8.2](https://github.com/geertmeersman/github-scripts/tree/v0.8.2) (2025-06-08)
+
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.8.1...v0.8.2)
+
+**Merged pull requests:**
+
+- fix: year in jinja [\#31](https://github.com/geertmeersman/github-scripts/pull/31) ([geertmeersman](https://github.com/geertmeersman))
+
 ## [v0.8.1](https://github.com/geertmeersman/github-scripts/tree/v0.8.1) (2025-06-08)
 
 [Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.8.0...v0.8.1)
