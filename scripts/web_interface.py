@@ -169,8 +169,8 @@ TEMPLATE = """
                         const row = document.createElement("tr");
                         row.innerHTML = `
                             <td>${record.script}</td>
-                            <td>${new Date(record.start).toLocaleString()}</td>
-                            <td>${new Date(record.end).toLocaleString()}</td>
+                            <td>${record.start}</td>
+                            <td>${record.end)}</td>
                             <td>${record.status}</td>
                         `;
                         tbody.appendChild(row);
