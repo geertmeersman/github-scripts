@@ -8,7 +8,15 @@ from flask_socketio import SocketIO
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "default-secret")
-socketio = SocketIO(app, async_mode="eventlet", cors_allowed_origins="https://github.bee.mgweb.be")
+- socketio = SocketIO(app, async_mode="eventlet", cors_allowed_origins="https://github.bee.mgweb.be")
++ socketio = SocketIO(
++     app,
++     async_mode="eventlet",
++     cors_allowed_origins=os.environ.get(
++         "CORS_ALLOWED_ORIGINS",
++         "https://github.bee.mgweb.be"
++     )
++ )
 
 SCRIPTS_FILE = "/home/scripts.json"
 
