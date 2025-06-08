@@ -8,11 +8,13 @@ RUN apt-get update && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Copy Python scripts into container
-COPY scripts/auto_merge_dependabot.py /home/auto_merge_dependabot.py
-COPY scripts/report_open_prs.py /home/report_open_prs.py
-COPY scripts/describe_cron.py /home/describe_cron.py
-COPY scripts/web_interface.py /home/web_interface.py
-COPY scripts/scripts.json /home/scripts.json
+COPY scripts/github/auto_merge_dependabot.py /home/auto_merge_dependabot.py
+COPY scripts/github/report_open_prs.py /home/report_open_prs.py
+COPY scripts/github/scripts.json /home/scripts.json
+
+COPY scripts/container/describe_cron.py /home/describe_cron.py
+COPY scripts/container/cron_wrapper.py /home/cron_wrapper.py
+COPY scripts/flask/web_interface.py /home/web_interface.py
 
 # Copy entrypoint and make it executable
 COPY entrypoint.sh /entrypoint.sh
@@ -33,7 +35,7 @@ RUN crontab /etc/cron.d/github_scripts  # Register cron job
 COPY VERSION /VERSION
 
 # Healthcheck
-COPY scripts/healthcheck.sh /healthcheck.sh
+COPY scripts/container/healthcheck.sh /healthcheck.sh
 RUN chmod +x /healthcheck.sh
 
 HEALTHCHECK CMD /healthcheck.sh
