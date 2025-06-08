@@ -362,7 +362,7 @@ TEMPLATE = """
             </a>
         </div>
         <div style="margin-top: 0.25rem;">
-            &copy; {{ now.year }} Geert Meersman
+            &copy; {{ year }} Geert Meersman
         </div>
     </footer>
 </body>
@@ -425,13 +425,15 @@ def run_script_with_live_output(script_name):
 @app.route("/", methods=["GET"])
 def home():
     version = read_version()
+    current_year = datetime.now().year
     return render_template_string(
         TEMPLATE,
         scripts=SCRIPTS,
         execution_status=execution_status,
         execution_logs=execution_logs,
         run_history=run_history,
-        version=version
+        version=version,
+        year=current_year
     )
 
 @app.route("/run/<script_name>", methods=["POST"])
