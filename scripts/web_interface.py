@@ -74,6 +74,9 @@ TEMPLATE = """
 <body>
     <div class=\"container\">
         <h1 class=\"mb-4\">GitHub Script Dashboard</h1>
+        <div class="mb-3">
+            <span id="ws-status" class="badge bg-secondary">WebSocket: Connecting...</span>
+        </div>
         <div id=\"toast-container\"></div>
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% for category, message in messages %}
@@ -155,13 +158,21 @@ TEMPLATE = """
             reconnectionDelayMax: 5000,    // max 5 seconds delay between attempts
             timeout: 20000,                // connection timeout
         });
+        const wsStatus = document.getElementById("ws-status");
+
+        function setWsStatus(state, color) {
+            wsStatus.textContent = "WebSocket: " + state;
+            wsStatus.className = "badge bg-" + color;
+        }
 
         socket.on("connect", () => {
             console.log("✅ Socket.IO connected");
+            setWsStatus("Connected", "success");
         });
 
         socket.on("disconnect", (reason) => {
             console.warn("⚠️ Socket.IO disconnected:", reason);
+            setWsStatus("Disconnected", "danger")
             const toast = document.createElement("div");
             toast.className = "toast align-items-center text-white bg-danger border-0 show";
             toast.innerHTML = `
@@ -172,12 +183,16 @@ TEMPLATE = """
             document.getElementById("toast-container").appendChild(toast);
         });
 
+        socket.on("connect_error", () => setWsStatus("Error", "danger"));
+
         socket.on("reconnect_attempt", (attempt) => {
             console.log(`🔁 Reconnect attempt ${attempt}`);
+            setWsStatus("Reconnecting...", "warning")
         });
 
         socket.on("reconnect_failed", () => {
             console.error("❌ Socket.IO failed to reconnect after max attempts");
+            setWsStatus("Reconnect failed", "danger")
         });
 
         socket.on("log_update", (data) => {
