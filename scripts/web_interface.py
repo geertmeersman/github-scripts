@@ -113,22 +113,18 @@ TEMPLATE = """
             </div>
             {% endfor %}
         </div>
-        <h3 class=\"mt-4\">Run History</h3>
-        <table class=\"table table-striped\">
-            <thead>
-                <tr><th>Script</th><th>Start</th><th>End</th><th>Status</th></tr>
-            </thead>
-            <tbody>
-                {% for record in run_history[-10:]|reverse %}
-                <tr class=\"clickable-row\" data-bs-toggle=\"modal\" data-bs-target=\"#historyModal\" data-script=\"{{ record.script }}\" data-start=\"{{ record.start }}\" data-end=\"{{ record.end }}\" data-status=\"{{ record.status }}\">
-                    <td>{{ record.script }}</td>
-                    <td>{{ record.start }}</td>
-                    <td>{{ record.end }}</td>
-                    <td>{{ record.status }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <h3 class="mt-4">Run History</h3>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr><th>Script</th><th>Start</th><th>End</th><th>Status</th></tr>
+                </thead>
+                <tbody id="run-history-body"></tbody>
+            </table>
+        </div>
+        <nav>
+            <ul class="pagination" id="history-pagination"></ul>
+        </nav>
     </div>
 
     <div class=\"modal fade\" id=\"historyModal\" tabindex=\"-1\" aria-labelledby=\"historyModalLabel\" aria-hidden=\"true\">
