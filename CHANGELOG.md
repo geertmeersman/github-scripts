@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.7.0](https://github.com/geertmeersman/github-scripts/tree/v0.7.0) (2025-06-08)
+
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.6.0...v0.7.0)
+
+**Merged pull requests:**
+
+- feat: report open pr script [\#27](https://github.com/geertmeersman/github-scripts/pull/27) ([geertmeersman](https://github.com/geertmeersman))
+
 ## [v0.6.0](https://github.com/geertmeersman/github-scripts/tree/v0.6.0) (2025-06-08)
 
 [Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.5.9...v0.6.0)
@@ -43,19 +51,19 @@
 
 ## [v0.5.5](https://github.com/geertmeersman/github-scripts/tree/v0.5.5) (2025-06-08)
 
-[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.5.4...v0.5.5)
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.5.3...v0.5.5)
 
 **Merged pull requests:**
 
 - fix: eventlet for websocket [\#20](https://github.com/geertmeersman/github-scripts/pull/20) ([geertmeersman](https://github.com/geertmeersman))
 
-## [v0.5.4](https://github.com/geertmeersman/github-scripts/tree/v0.5.4) (2025-06-08)
-
-[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.5.3...v0.5.4)
-
 ## [v0.5.3](https://github.com/geertmeersman/github-scripts/tree/v0.5.3) (2025-06-08)
 
-[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.5.2...v0.5.3)
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.5.4...v0.5.3)
+
+## [v0.5.4](https://github.com/geertmeersman/github-scripts/tree/v0.5.4) (2025-06-08)
+
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.5.2...v0.5.4)
 
 ## [v0.5.2](https://github.com/geertmeersman/github-scripts/tree/v0.5.2) (2025-06-08)
 
