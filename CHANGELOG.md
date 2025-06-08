@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.8.1](https://github.com/geertmeersman/github-scripts/tree/v0.8.1) (2025-06-08)
+
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.8.0...v0.8.1)
+
+**Merged pull requests:**
+
+- chore: reorganise [\#30](https://github.com/geertmeersman/github-scripts/pull/30) ([geertmeersman](https://github.com/geertmeersman))
+
 ## [v0.8.0](https://github.com/geertmeersman/github-scripts/tree/v0.8.0) (2025-06-08)
 
 [Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.7.1...v0.8.0)
