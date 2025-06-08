@@ -3,8 +3,8 @@ import subprocess
 import threading
 import datetime
 import json
-from flask import Flask, jsonify, render_template_string, redirect, url_for, flash, send_file
-from flask_socketio import SocketIO, emit
+from flask import Flask, jsonify, render_template_string, redirect, url_for, flash, send_file, request
+from flask_socketio import SocketIO
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "default-secret")
