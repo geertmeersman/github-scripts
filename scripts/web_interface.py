@@ -103,7 +103,7 @@ TEMPLATE = """
                         {% elif status == \"error\" %}
                             <p>Status: <span class=\"status-error\">Error ✘</span></p>
                         {% else %}
-                            <p>Status: <span>Not run</span></p>
+                            <p>Status: <span>Not running</span></p>
                         {% endif %}
                         <form method=\"post\" action=\"/run/{{ name }}\">
                             <button class=\"btn btn-primary\" type=\"submit\" {% if status == \"running\" %}disabled{% endif %}>Run Script</button>
@@ -242,6 +242,27 @@ TEMPLATE = """
             const [date, time] = raw.split("_");
             return date + " " + time.replace(/-/g, ":");
         }
+        function bindHistoryRowClicks() {
+            document.querySelectorAll(".run-history-row").forEach(row => {
+                row.addEventListener("click", () => {
+                const logFile = row.getAttribute("data-logfile");
+                fetch(`/logfile/${logFile}`)
+                    .then(res => res.json())
+                    .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                        return;
+                    }
+                    const modalBody = document.getElementById("modal-body-content");
+                    modalBody.innerHTML = `<pre>${data.content || "(No log content)"}</pre>`;
+                    const modal = new bootstrap.Modal(document.getElementById("historyModal"));
+                    modal.show();
+                    })
+                    .catch(err => alert("Failed to load log: " + err));
+                });
+            });
+        }
+
         function loadHistoryPage(page) {
             fetch(`/history?page=${page}&per_page=${perPage}`)
                 .then(response => response.json())
@@ -250,6 +271,8 @@ TEMPLATE = """
                     tbody.innerHTML = "";
                     for (const record of data.records) {
                         const row = document.createElement("tr");
+                        row.className = "run-history-row";
+                        row.setAttribute("data-logfile", record.log_file);
                         row.innerHTML = `
                             <td>${record.script}</td>
                             <td>${formatSimpleDate(record.start)}</td>
@@ -274,6 +297,7 @@ TEMPLATE = """
                         pagination.appendChild(li);
                     }
                 });
+            bindHistoryRowClicks(); // reattach clicks to new rows
         }
 
         setInterval(() => loadHistoryPage(currentPage), 5000); // auto refresh

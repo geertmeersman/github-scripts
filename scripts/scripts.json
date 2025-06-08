@@ -3,4 +3,10 @@
     "path": "/home/auto_merge_dependabot.py",
     "description": "Automatically merge open Dependabot PRs and notify via email and Telegram.",
     "args": []
-  }}
+  },
+    "report_open_prs": {
+    "path": "/home/report_open_prs.py",
+    "description": "Generates a categorized GitHub pull request report for a user and emails it as a styled HTML summary.",
+    "args": []
+  }
+}
