@@ -9,6 +9,7 @@ RUN apt-get update && \
 
 # Copy Python scripts into container
 COPY scripts/auto_merge_dependabot.py /home/auto_merge_dependabot.py
+COPY scripts/report_open_prs.py /home/report_open_prs.py
 COPY scripts/describe_cron.py /home/describe_cron.py
 COPY scripts/web_interface.py /home/web_interface.py
 COPY scripts/scripts.json /home/scripts.json
