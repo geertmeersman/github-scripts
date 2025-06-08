@@ -222,6 +222,11 @@ TEMPLATE = """
         let currentPage = 1;
         const perPage = 10;
 
+        function formatSimpleDate(raw) {
+            if (!raw) return "";
+            const [date, time] = raw.split("_");
+            return date + " " + time.replace(/-/g, ":");
+        }
         function loadHistoryPage(page) {
             fetch(`/history?page=${page}&per_page=${perPage}`)
                 .then(response => response.json())
@@ -232,8 +237,8 @@ TEMPLATE = """
                         const row = document.createElement("tr");
                         row.innerHTML = `
                             <td>${record.script}</td>
-                            <td>${record.start}</td>
-                            <td>${record.end}</td>
+                            <td>${formatSimpleDate(record.start)}</td>
+                            <td>${formatSimpleDate(record.end)}</td>
                             <td>${record.status}</td>
                         `;
                         tbody.appendChild(row);
