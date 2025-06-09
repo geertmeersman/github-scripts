@@ -1,6 +1,7 @@
 # report_utils.py
 
 import os
+import html
 from datetime import datetime
 
 def wrap_html_report(content_html, title="HTML Report", github_user="GitHub User", output_path=None):
@@ -17,20 +18,22 @@ def wrap_html_report(content_html, title="HTML Report", github_user="GitHub User
         str: The complete HTML report.
     """
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
+    # Escape user inputs to prevent XSS (except content_html which is expected to contain HTML)  
+    escaped_title = html.escape(title)  
+    escaped_github_user = html.escape(github_user)  
     html = f"""
     <!DOCTYPE html>
     <html>
     <head>
         <meta charset="UTF-8">
-        <title>{title}</title>
+        <title>{escaped_title}</title>
     </head>
     <body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;">
       <div style="max-width: 700px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 8px rgba(0,0,0,0.1);">
         <div style="text-align: center; margin-bottom: 20px;">
           <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="64" height="64" />
-          <h2 style="color: #333;">{title}</h2>
-          <p style="color: #666;">for <strong>{github_user}</strong></p>
+          <h2 style="color: #333;">{escaped_title}</h2>
+          <p style="color: #666;">for <strong>{escaped_github_user}</strong></p>
           <p style="color: #aaa; font-size: 12px;">Generated on {timestamp}</p>
         </div>
 
@@ -45,9 +48,15 @@ def wrap_html_report(content_html, title="HTML Report", github_user="GitHub User
     """
 
     if output_path:
-        os.makedirs(os.path.dirname(output_path), exist_ok=True)
-        with open(output_path, 'w', encoding='utf-8') as f:
-            f.write(html)
-        print(f"[INFO] HTML report written to: {output_path}")
+        try:
+            output_dir = os.path.dirname(output_path)
+            if output_dir:
+                os.makedirs(output_dir, exist_ok=True)
+            with open(output_path, 'w', encoding='utf-8') as f:
+                f.write(html)
+            print(f"[INFO] HTML report written to: {output_path}")
+        except Exception as e:
+            print(f"[ERROR] Failed to write HTML report to {output_path}: {e}")
+            raise
 
     return html
