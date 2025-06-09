@@ -74,6 +74,9 @@ Built and maintained by [Geert Meersman](https://github.com/gmeersman)
 /cron/
 └── cronjob                      # All cron job entries
 
+/docker-compose/
+└── compose.yml                  # Docker compose config
+
 entrypoint.sh                    # Starts cron + Flask via Gunicorn
 Dockerfile
 VERSION
@@ -103,6 +106,9 @@ EMAIL_TO=<email-to>
 # Telegram (optional)
 TELEGRAM_BOT_ID=<your-bot-id>
 TELEGRAM_CHAT_ID=<your-chat-id>
+
+# Volume path
+LOG_VOLUME=<path-for-log-mount>
 ```
 
 ---
