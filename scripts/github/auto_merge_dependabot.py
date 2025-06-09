@@ -4,6 +4,8 @@ import time
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from report_utils import wrap_html_report
+
 
 # === CONFIG ===
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
@@ -84,6 +86,7 @@ def send_email_report():
         return
 
     subject = f"[Dependabot Auto-Merge] {len(unmerged_prs)} PR(s) not merged"
+
     if unmerged_prs:
         body = "<h3>Unmerged PRs</h3><ul>"
         for repo, pr_number, url, reason in unmerged_prs:
@@ -92,11 +95,18 @@ def send_email_report():
     else:
         body = "<p>All Dependabot PRs were merged successfully! 🎉</p>"
 
+    # Wrap the content using your custom HTML wrapper
+    html_report = wrap_html_report(
+        content_html=body,
+        title="Dependabot Auto-Merge Report",
+        github_user=GITHUB_USER
+    )
+
     msg = MIMEMultipart()
     msg['From'] = EMAIL_FROM
     msg['To'] = EMAIL_TO
     msg['Subject'] = subject
-    msg.attach(MIMEText(body, "html"))
+    msg.attach(MIMEText(html_report, "html"))
 
     try:
         with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
