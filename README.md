@@ -19,105 +19,165 @@
 
 
 
-# Dependabot Auto-Merge & Scripts Dashboard
+# 🔄 GitHub Scripts Dashboard
 
-Automate merging Dependabot pull requests across multiple GitHub repositories with notifications by email and Telegram.  
-Includes a lightweight Flask web dashboard for manual script execution and status monitoring.
-
----
-
-## Features
-
-- Auto-merge Dependabot PRs in multiple repos
-- Email and Telegram notifications with PR info
-- Runs as a scheduled cron job inside Docker
-- Web UI to manually run scripts and view their output
-- Supports multiple scripts with descriptions
-- Execution status indicators in UI
-- Configurable web interface port
+A Dockerized automation suite to manage GitHub workflows like auto-merging Dependabot PRs and sending daily PR reports — complete with a web interface, cron integration, and notifications.
 
 ---
 
-## Getting Started
+## 📆 Overview
 
-### Prerequisites
+This container:
 
-- Docker installed (recommended)
-- GitHub Personal Access Token with repo permissions
-- SMTP server for sending emails
-- Telegram Bot ID and Chat ID for notifications (optional)
+* 🧠 Automatically **merges Dependabot PRs**
+* 📧 **Emails you** a daily **PR report** (PRs authored/assigned/mentioning you)
+* 🖥️ Exposes a **Flask dashboard** (on port 80) to manually trigger/monitor scripts
+* 🔁 Runs on **cron** internally (02:00 and 06:00)
+* 📨 Sends **email + Telegram** notifications
+* 📌 Logs all activity to `/var/log/github-scripts/`
 
-### Environment Variables
-
-Set the following environment variables (e.g., in `.env` file or Docker environment):
-
-| Variable          | Description                                 | Required  |
-|-------------------|---------------------------------------------|-----------|
-| `GITHUB_TOKEN`    | GitHub API token with repo permissions      | Yes       |
-| `EMAIL_TO`        | Recipient email address                     | Yes       |
-| `EMAIL_FROM`      | Sender email address                        | Yes       |
-| `SMTP_HOST`       | SMTP server hostname                        | Yes       |
-| `SMTP_PORT`       | SMTP server port (e.g., 587)                | Yes       |
-| `SMTP_USER`       | SMTP username                               | Yes       |
-| `SMTP_PWD`        | SMTP password                               | Yes       |
-| `TELEGRAM_BOT_ID` | Telegram bot token (optional)               | No        |
-| `TELEGRAM_CHAT_ID`| Telegram chat ID to send messages (optional)| No        |
-| `WEB_PORT`        | Port for web interface (default: 80)        | No        |
+Built and maintained by [Geert Meersman](https://github.com/gmeersman)
 
 ---
 
-## Usage
+## 🧠 Features
 
-### Build Docker Image
+| Feature                    | Description                                            |
+| -------------------------- | ------------------------------------------------------ |
+| 🔁 Auto-Merge              | Merges eligible Dependabot PRs using GitHub API        |
+| 📧 PR Report Emails        | Sends daily HTML summary of PRs authored/assigned/etc. |
+| 🖥️ Web UI                 | Run and view scripts via browser (port 80)             |
+| 🥐 Cron-Based Execution    | Auto-runs at 2:00 and 6:00 UTC                         |
+| 🔔 Email & Telegram Alerts | Optional notifications on success/failure              |
+| ❤️ Lightweight Container   | Based on `python:3.11-slim`                            |
+
+---
+
+## 📂 File Structure
+
+```
+/scripts/github/
+├── auto_merge_dependabot.py     # Script: merge dependabot PRs
+├── report_open_prs.py           # Script: send PR report
+├── notify_utils.py              # Utilities: Email & Telegram
+├── report_utils.py              # Utilities: HTML report wrapper
+├── scripts.json                 # Metadata for dashboard
+
+/scripts/container/
+├── cron_wrapper.py              # Wrapper: logs script + error output
+├── describe_cron.py             # Describes cron jobs at startup
+├── healthcheck.sh               # Healthcheck used by Docker
+
+/web/
+└── web_interface.py             # Flask dashboard (port 80)
+
+/cron/
+└── cronjob                      # All cron job entries
+
+entrypoint.sh                    # Starts cron + Flask via Gunicorn
+Dockerfile
+VERSION
+```
+
+---
+
+## ⚙️ Environment Variables (`.env`)
+
+```env
+# Web
+WEB_PORT=80
+
+# GitHub
+GITHUB_USER=<your-github-user>
+GITHUB_TOKEN=<your-token>
+MERGE_METHOD=squash
+
+# Email (optional)
+SMTP_USER=<your-user>
+SMTP_PWD=<your-password>
+SMTP_SERVER=<smtp-server>
+SMTP_PORT=587
+EMAIL_FROM=<email-from>
+EMAIL_TO=<email-to>
+
+# Telegram (optional)
+TELEGRAM_BOT_ID=<your-bot-id>
+TELEGRAM_CHAT_ID=<your-chat-id>
+```
+
+---
+
+## 🚪 Running It
+
+### 🔧 Build Image
 
 ```bash
 docker build -t github-scripts .
 ```
 
-### Run Container
+### 🚀 Run Container
 
 ```bash
-docker run -p 80:80 github-scripts
+docker run -d \
+  --env-file .env \
+  --name github-scripts \
+  -p 80:80 \
+  github-scripts
 ```
 
-- The web UI will be available at `http://localhost:80`
-- The auto-merge script runs as a scheduled cron job inside the container
-- Use the web UI to manually trigger scripts and view output/status
+The dashboard will be available at: [http://localhost](http://localhost)
 
 ---
 
-## Web Interface
+## ⏰ Cron Schedule (Inside Container)
 
-- Navigate to `/` (e.g., `http://localhost:80`)
-- View available scripts with descriptions and execution status
-- Click **Run Script** to start a script asynchronously
-- Refresh page to see updated status and output
+| Time (UTC) | Script                  | Log File                                                 |
+| ---------- | ----------------------- | -------------------------------------------------------- |
+| 02:00      | `auto_merge_dependabot` | `/var/log/github-scripts/auto_merge_dependabot_cron.log` |
+| 06:00      | `report_open_prs`       | `/var/log/github-scripts/report_open_prs_cron.log`       |
 
----
-
-## Security Considerations
-
-- Consider adding authentication to the web interface if exposed publicly
-- Keep your GitHub token and SMTP credentials secure
-- Limit network access to the container if possible
+Each job is executed through `cron_wrapper.py`, which logs stdout and stderr.
 
 ---
 
-## Troubleshooting
+## 📨 Notifications
 
-- Check container logs for errors:
-  ```bash
-  docker logs <container_id>
-  ```
-- Verify environment variables are correctly set
-- Make sure SMTP credentials and Telegram bot info are valid
-- Ensure GitHub token has appropriate repo permissions
+* **Email**: Sent using SMTP config (see `.env`)
+* **Telegram**: Optional webhook alert for job success/failure
+
+If credentials are missing, notification modules gracefully skip execution.
 
 ---
 
-## License
+## ♻️ Entrypoint Behavior
+
+On container start:
+
+1. ✅ Environment is dumped to `/env.sh`
+2. ⏰ Cron daemon starts
+3. 📜 Cron jobs are described via `describe_cron.py`
+4. 🌐 Flask app is launched on port `80` using Gunicorn
+
+Logs and errors are automatically routed for cron jobs and can be inspected using:
+
+```bash
+docker exec -it github-scripts tail -n 100 /var/log/github-scripts/*.log
+```
+
+---
+
+## ✅ Healthcheck
+
+Docker health check runs via `/healthcheck.sh`, which confirms the Flask UI is up.
+
+```bash
+curl http://localhost/health
+```
+
+---
+
+## 👤 Author
+
+Geert Meersman — [@gmeersman](https://github.com/gmeersman)
 
 MIT License
-
----
-
