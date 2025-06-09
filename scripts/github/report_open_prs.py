@@ -1,24 +1,15 @@
 import os
 import requests
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 from report_utils import wrap_html_report
+from notify_utils import send_email_report
 
 # === ENVIRONMENT VARIABLES ===
 GITHUB_USER = os.getenv("GITHUB_USER")
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 
-EMAIL_FROM = os.getenv("EMAIL_FROM")
-EMAIL_TO = os.getenv("EMAIL_TO")
-SMTP_SERVER = os.getenv("SMTP_SERVER")
-SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
-SMTP_USER = os.getenv("SMTP_USER")
-SMTP_PWD = os.getenv("SMTP_PWD")
-
 REQUESTS_TIMEOUT = 10
 
-if not all([GITHUB_USER, GITHUB_TOKEN, EMAIL_FROM, EMAIL_TO, SMTP_SERVER, SMTP_USER, SMTP_PWD]):
+if not all([GITHUB_USER, GITHUB_TOKEN]):
     raise ValueError("❌ Missing one or more required environment variables.")
 
 HEADERS = {
@@ -72,21 +63,6 @@ def generate_html_report(pr_data):
         title="GitHub Pull Request Report",
         github_user=GITHUB_USER
     )
-    
-def send_email(subject, html_body):
-    msg = MIMEMultipart('alternative')
-    msg['Subject'] = subject
-    msg['From'] = EMAIL_FROM
-    msg['To'] = EMAIL_TO
-
-    part = MIMEText(html_body, 'html')
-    msg.attach(part)
-
-    with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
-        server.starttls()
-        server.login(SMTP_USER, SMTP_PWD)
-        server.sendmail(EMAIL_FROM, EMAIL_TO, msg.as_string())
-    print(f"\n📧 Report emailed to {EMAIL_TO}")
 
 def main():
     print(f"📡 Fetching open pull requests for {GITHUB_USER}...\n")
@@ -102,7 +78,10 @@ def main():
 
     print_to_console(pr_results)
     html_report = generate_html_report(pr_results)
-    send_email(f"GitHub PR Report for {GITHUB_USER}", html_report)
+
+    subject = f"GitHub PR Report for {GITHUB_USER}"
+    # EMAIL_TO is optional now and configured inside notify_utils
+    send_email_report(subject, html_report)
 
 if __name__ == "__main__":
     main()
