@@ -1,6 +1,6 @@
 import json
 import datetime
-import subprocess, sys
+import subprocess
 import fcntl
 import sys
 import os
