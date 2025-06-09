@@ -304,7 +304,7 @@ TEMPLATE = """
                     const modalBody = document.getElementById("modal-body-content");
                     const modalTitle = document.getElementById("historyModalLabel");
                     modalBody.innerHTML = `<pre>${data.content || "(No log content)"}</pre>`;
-                    modalTitle.innerHTML = row.getAttribute("data-script")+" - "+row.getAttribute("data-start");
+                    modalTitle.textContent = `${row.getAttribute("data-script")} - ${row.getAttribute("data-start")}`;
                     const modal = new bootstrap.Modal(document.getElementById("historyModal"));
                     modal.show();
                     })
@@ -323,7 +323,7 @@ TEMPLATE = """
                         const row = document.createElement("tr");
                         row.className = "run-history-row";
                         row.setAttribute("data-logfile", record.log_file);
-                        row.setAttribute("data-script", formatSimpleDate(record.script));
+                        row.setAttribute("data-script", record.script);
                         row.setAttribute("data-start", formatSimpleDate(record.start));
                         row.innerHTML = `
                             <td>${record.script}</td>
