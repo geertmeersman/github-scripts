@@ -6,7 +6,11 @@ from email.mime.multipart import MIMEMultipart
 
 # === Email Config ===
 SMTP_SERVER = os.getenv("SMTP_SERVER")
-SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
+try:
+    SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
+except ValueError:
+    print("⚠️ Invalid SMTP_PORT, using default 587")
+    SMTP_PORT = 587
 SMTP_USER = os.getenv("SMTP_USER")
 SMTP_PWD = os.getenv("SMTP_PWD")
 EMAIL_FROM = os.getenv("EMAIL_FROM", SMTP_USER)
