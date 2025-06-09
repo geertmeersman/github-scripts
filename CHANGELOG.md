@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.9.0](https://github.com/geertmeersman/github-scripts/tree/v0.9.0) (2025-06-09)
+
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.8.2...v0.9.0)
+
+**Merged pull requests:**
+
+- fix: datetime & modal [\#32](https://github.com/geertmeersman/github-scripts/pull/32) ([geertmeersman](https://github.com/geertmeersman))
+
 ## [v0.8.2](https://github.com/geertmeersman/github-scripts/tree/v0.8.2) (2025-06-08)
 
 [Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.8.1...v0.8.2)
