@@ -12,6 +12,9 @@ COPY scripts/github/auto_merge_dependabot.py /home/auto_merge_dependabot.py
 COPY scripts/github/report_open_prs.py /home/report_open_prs.py
 COPY scripts/github/scripts.json /home/scripts.json
 
+COPY scripts/github/notify_utils.py /home/notify_utils.py
+COPY scripts/github/report_utils.py /home/report_utils.py
+
 COPY scripts/container/describe_cron.py /home/describe_cron.py
 COPY scripts/container/cron_wrapper.py /home/cron_wrapper.py
 COPY scripts/flask/web_interface.py /home/web_interface.py

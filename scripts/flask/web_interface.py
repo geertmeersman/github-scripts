@@ -1,7 +1,7 @@
 import os
 import subprocess
 import threading
-import datetime
+from datetime import datetime
 import json
 from flask import Flask, jsonify, render_template_string, redirect, url_for, flash, send_file, request
 from flask_socketio import SocketIO
@@ -181,7 +181,7 @@ TEMPLATE = """
     </div>
 
     <div class=\"modal fade\" id=\"historyModal\" tabindex=\"-1\" aria-labelledby=\"historyModalLabel\" aria-hidden=\"true\">
-      <div class=\"modal-dialog\">
+      <div class=\"modal-dialog modal-lg\">
         <div class=\"modal-content\">
           <div class=\"modal-header\">
             <h5 class=\"modal-title\" id=\"historyModalLabel\">Run Details</h5>
@@ -302,7 +302,9 @@ TEMPLATE = """
                         return;
                     }
                     const modalBody = document.getElementById("modal-body-content");
+                    const modalTitle = document.getElementById("historyModalLabel");
                     modalBody.innerHTML = `<pre>${data.content || "(No log content)"}</pre>`;
+                    modalTitle.textContent = `${row.getAttribute("data-script")} - ${row.getAttribute("data-start")}`;
                     const modal = new bootstrap.Modal(document.getElementById("historyModal"));
                     modal.show();
                     })
@@ -321,6 +323,8 @@ TEMPLATE = """
                         const row = document.createElement("tr");
                         row.className = "run-history-row";
                         row.setAttribute("data-logfile", record.log_file);
+                        row.setAttribute("data-script", record.script);
+                        row.setAttribute("data-start", formatSimpleDate(record.start));
                         row.innerHTML = `
                             <td>${record.script}</td>
                             <td>${formatSimpleDate(record.start)}</td>
@@ -374,7 +378,7 @@ def run_script_with_live_output(script_name):
     execution_logs[script_name] = []
     socketio.emit("status_update", {"script": script_name, "status": "running"})  # ← NEW
 
-    start_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    start_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     end_time = None
 
     try:
@@ -406,7 +410,7 @@ def run_script_with_live_output(script_name):
         execution_status[script_name] = "error"
         socketio.emit("status_update", {"script": script_name, "status": "error"})  # ← NEW
     finally:
-        end_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        end_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         log_filename = f"{script_name}_{start_time.replace(':', '-')}.log"
         run_history.append({
             "script": script_name,
