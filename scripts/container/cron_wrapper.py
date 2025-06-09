@@ -1,6 +1,6 @@
 import json
 import datetime
-import subprocess
+import subprocess, sys
 import fcntl
 import sys
 import os
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     try:
         with open(log_path, "w") as log_file:
             result = subprocess.run(
-                ["/usr/local/bin/python3", script_path],
+                [sys.executable, script_path],
                 stdout=log_file,
                 stderr=subprocess.STDOUT,
                 text=True,
