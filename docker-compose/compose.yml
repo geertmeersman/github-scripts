@@ -18,5 +18,5 @@ services:
       TELEGRAM_BOT_ID: 123456:ABCDEF
       TELEGRAM_CHAT_ID: -12345678
     ports:
-      - "631:631"  # Optional: expose CUPS web interface
+      - "80:80"  # Optional: expose web interface
     tty: true
