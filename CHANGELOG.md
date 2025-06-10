@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.9.2](https://github.com/geertmeersman/github-scripts/tree/v0.9.2) (2025-06-10)
+
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.9.1...v0.9.2)
+
+**Merged pull requests:**
+
+- fix: Update cronjob to include env vars [\#35](https://github.com/geertmeersman/github-scripts/pull/35) ([geertmeersman](https://github.com/geertmeersman))
+- fix: port change in compose [\#34](https://github.com/geertmeersman/github-scripts/pull/34) ([geertmeersman](https://github.com/geertmeersman))
+
 ## [v0.9.1](https://github.com/geertmeersman/github-scripts/tree/v0.9.1) (2025-06-09)
 
 [Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.9.0...v0.9.1)
