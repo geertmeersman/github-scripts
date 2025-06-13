@@ -109,6 +109,10 @@ TEMPLATE = """
             vertical-align: middle;
             margin-right: 0.5rem;
         }
+
+        .history-row:hover {
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -500,18 +504,30 @@ def get_history():
         page = int(request.args.get("page", 1))
         per_page = int(request.args.get("per_page", 10))
     except ValueError:
-        page, per_page = 1, 10
+        return jsonify({"error": "Invalid pagination parameters"}), 400
 
+    # Always read from disk and sort by start timestamp (newest first)
+    try:
+        with open(HISTORY_FILE, "r") as f:
+            history = json.load(f)
+            history.sort(
+                key=lambda x: datetime.strptime(x["start"], "%Y-%m-%d_%H-%M-%S"),
+                reverse=True
+            )
+    except Exception as e:
+        return jsonify({"error": f"Failed to read history: {str(e)}"}), 500
+
+    total = len(history)
+    pages = (total + per_page - 1) // per_page
     start = (page - 1) * per_page
     end = start + per_page
-    total = len(run_history)
+    records = history[start:end]
 
     return jsonify({
-        "records": run_history[::-1][start:end],
+        "records": records,
         "page": page,
-        "per_page": per_page,
-        "total": total,
-        "pages": (total + per_page - 1) // per_page,
+        "pages": pages,
+        "total": total
     })
 
 @app.route("/health")
