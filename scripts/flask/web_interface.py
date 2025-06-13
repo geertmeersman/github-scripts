@@ -387,12 +387,13 @@ def run_script_with_live_output(script_name):
 
     try:
         script = SCRIPTS[script_name]
+        script_path = os.path.abspath(script["path"])
         process = subprocess.Popen(
-            ["python3", "-u", script["path"]],
+            [sys.executable, "-u", script_path],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
-            bufsize=1,
+            bufsize=1,  # Line-buffered output
             env=os.environ.copy()
         )
         script_threads[script_name] = {"thread": threading.current_thread(), "process": process}
