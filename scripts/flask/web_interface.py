@@ -110,7 +110,7 @@ TEMPLATE = """
             margin-right: 0.5rem;
         }
 
-        .history-row:hover {
+        .run-history-row:hover {
             cursor: pointer;
         }
     </style>
@@ -515,7 +515,8 @@ def get_history():
                 reverse=True
             )
     except Exception as e:
-        return jsonify({"error": f"Failed to read history: {str(e)}"}), 500
+        app.logger.error(f"Failed to read history: {str(e)}")
+        return jsonify({"error": "An internal error occurred while reading history."}), 500
 
     total = len(history)
     pages = (total + per_page - 1) // per_page
