@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.9.4](https://github.com/geertmeersman/github-scripts/tree/v0.9.4) (2025-06-13)
+
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.9.3...v0.9.4)
+
+**Merged pull requests:**
+
+- fix: script path validation & sys.executable [\#38](https://github.com/geertmeersman/github-scripts/pull/38) ([geertmeersman](https://github.com/geertmeersman))
+- fix: Improved error handling for history retrieval [\#37](https://github.com/geertmeersman/github-scripts/pull/37) ([geertmeersman](https://github.com/geertmeersman))
+
 ## [v0.9.3](https://github.com/geertmeersman/github-scripts/tree/v0.9.3) (2025-06-13)
 
 [Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.9.2...v0.9.3)
