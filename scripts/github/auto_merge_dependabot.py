@@ -16,6 +16,8 @@ HEADERS = {
 }
 
 unmerged_prs = []
+processed_prs = []
+
 
 
 def get_repos():
@@ -106,11 +108,17 @@ def main():
     print(f"📦 Found {len(repos)} repositories")
     for repo in repos:
         prs = get_dependabot_prs(repo)
+        if prs:
+            processed_prs.extend(prs)
         for pr in prs:
             merge_pr(repo, pr)
             time.sleep(1)
-    build_and_send_email()
-    build_and_send_telegram()
+
+    if processed_prs:
+        build_and_send_email()
+        build_and_send_telegram()
+    else:
+        print("📭 No Dependabot PRs found — skipping notifications.")
 
 
 if __name__ == '__main__':

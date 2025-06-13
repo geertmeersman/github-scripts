@@ -76,11 +76,16 @@ def main():
 
     pr_results = {name: search_prs(query) for name, query in categories.items()}
 
+    # Check if there's at least one PR
+    total_pr_count = sum(len(prs) for prs in pr_results.values())
+    if total_pr_count == 0:
+        print("📭 No open PRs found — skipping email report.")
+        return
+
     print_to_console(pr_results)
     html_report = generate_html_report(pr_results)
 
     subject = f"GitHub PR Report for {GITHUB_USER}"
-    # EMAIL_TO is optional now and configured inside notify_utils
     send_email_report(subject, html_report)
 
 if __name__ == "__main__":
