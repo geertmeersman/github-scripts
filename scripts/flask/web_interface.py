@@ -1,5 +1,6 @@
 import os
 import sys
+import re
 import subprocess
 import threading
 from datetime import datetime
@@ -17,6 +18,29 @@ socketio = SocketIO(
         "https://github.bee.mgweb.be"
     )
 )
+
+def is_safe_args(arg_list, allowed_args_config):
+    allowed_flags = {f"--{arg['name']}": arg for arg in allowed_args_config}
+
+    if len(arg_list) % 2 != 0:
+        return False, "Arguments must be in flag/value pairs"
+
+    for i in range(0, len(arg_list), 2):
+        flag = arg_list[i]
+        value = arg_list[i + 1]
+
+        if flag not in allowed_flags:
+            return False, f"Unexpected flag: {flag}"
+
+        arg_def = allowed_flags[flag]
+        if flag == "--user":
+            # For example: allow GitHub usernames like 'geertmeersman' or 'dependabot[bot]'
+            if not re.fullmatch(r"[a-zA-Z0-9\[\]_-]{1,40}", value):
+                return False, f"Invalid value for {flag}: {value}"
+
+        # You can extend validation here based on more metadata if needed
+
+    return True, ""
 
 def read_version():
     try:
@@ -491,6 +515,11 @@ def run_script_with_live_output(script_name, arg_values=None):
     try:
         script = SCRIPTS[script_name]
         script_path = os.path.abspath(script["path"])
+        arg_definitions = script.get("args", [])
+        # Validate user-provided args
+        valid, reason = is_safe_args(arg_values, arg_definitions)
+        if not valid:
+            raise ValueError(f"Unsafe or invalid arguments: {reason}")
         process = subprocess.Popen(
             [sys.executable, "-u", script_path, *arg_values],
             stdout=subprocess.PIPE,
@@ -499,6 +528,7 @@ def run_script_with_live_output(script_name, arg_values=None):
             bufsize=1,  # Line-buffered output
             env=os.environ.copy()
         )
+        logger.info("Running script: %s %s", script_path, arg_values)
         script_threads[script_name] = {"thread": threading.current_thread(), "process": process}
 
         for line in iter(process.stdout.readline, ''):

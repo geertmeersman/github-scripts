@@ -1,5 +1,6 @@
 import os
 import requests
+import time
 from report_utils import wrap_html_report
 from notify_utils import send_email_report
 
@@ -19,10 +20,22 @@ HEADERS = {
 }
 
 def search_issues(query):
-    url = f"https://api.github.com/search/issues?q={query}&per_page=100"
-    response = requests.get(url, headers=HEADERS, timeout=REQUESTS_TIMEOUT)
-    response.raise_for_status()
-    return response.json().get("items", [])
+    all_items = []
+    page = 1
+    while True:
+        # Add delay between requests to respect rate limits
+        time.sleep(0.1)        
+        url = f"https://api.github.com/search/issues?q={query}&per_page=100&page={page}"
+        response = requests.get(url, headers=HEADERS, timeout=REQUESTS_TIMEOUT)
+        response.raise_for_status()
+        items = response.json().get("items", [])
+        if not items:
+            break
+        all_items.extend(items)
+        page += 1
+        if len(all_items) >= 1000:  # GitHub search API limit
+            break
+    return all_items
 
 def format_labels(labels):
     if not labels:
@@ -87,7 +100,13 @@ def group_issues_by_repo_owner(issue_results):
     for category, issues in issue_results.items():
         for issue in issues:
             repo_url = issue["repository_url"]
-            owner = repo_url.split("/")[4]
+            # Extract owner from GitHub API URL: https://api.github.com/repos/owner/repo
+            url_parts = repo_url.split("/")
+            if len(url_parts) >= 6 and "repos" in url_parts:
+                owner = url_parts[url_parts.index("repos") + 1]
+            else:
+                # Fallback: assume it's not the user's repo
+                owner = "unknown"            
             key = "Your Repositories" if owner.lower() == GITHUB_USER.lower() else "Other Repositories"
             if category not in grouped[key]:
                 grouped[key][category] = []
