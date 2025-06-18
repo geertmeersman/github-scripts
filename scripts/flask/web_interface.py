@@ -32,7 +32,6 @@ def is_safe_args(arg_list, allowed_args_config):
         if flag not in allowed_flags:
             return False, f"Unexpected flag: {flag}"
 
-        arg_def = allowed_flags[flag]
         if flag == "--user":
             # For example: allow GitHub usernames like 'geertmeersman' or 'dependabot[bot]'
             if not re.fullmatch(r"[a-zA-Z0-9\[\]_-]{1,40}", value):
@@ -528,7 +527,6 @@ def run_script_with_live_output(script_name, arg_values=None):
             bufsize=1,  # Line-buffered output
             env=os.environ.copy()
         )
-        logger.info("Running script: %s %s", script_path, arg_values)
         script_threads[script_name] = {"thread": threading.current_thread(), "process": process}
 
         for line in iter(process.stdout.readline, ''):
