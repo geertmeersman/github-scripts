@@ -8,7 +8,7 @@ RUN apt-get update && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Copy Python scripts into container
-COPY scripts/github/auto_merge_dependabot.py /home/auto_merge_dependabot.py
+COPY scripts/github/auto_merge_prs.py /home/auto_merge_prs.py
 COPY scripts/github/report_open_prs.py /home/report_open_prs.py
 COPY scripts/github/scripts.json /home/scripts.json
 

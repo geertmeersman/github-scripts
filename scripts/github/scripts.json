@@ -1,8 +1,15 @@
 {
-  "auto_merge_dependabot": {
-    "path": "/home/auto_merge_dependabot.py",
-    "description": "Automatically merge open Dependabot PRs and notify via email and Telegram.",
-    "args": []
+  "auto_merge_prs": {
+    "path": "/home/auto_merge_prs.py",
+    "description": "Automatically merge open PRs (default for user dependabot[bot]) and notify via email and Telegram.",
+    "args": [
+      {
+        "name": "user",
+        "label": "GitHub Username",
+        "required": false,
+        "default": "dependabot[bot]"
+      }
+    ]
   },
     "report_open_prs": {
     "path": "/home/report_open_prs.py",

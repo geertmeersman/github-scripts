@@ -4,7 +4,7 @@ import subprocess
 import threading
 from datetime import datetime
 import json
-from flask import Flask, jsonify, render_template_string, redirect, url_for, flash, send_file, request
+from flask import Flask, jsonify, render_template_string, redirect, url_for, flash, send_file, request, session
 from flask_socketio import SocketIO
 
 app = Flask(__name__)
@@ -154,7 +154,21 @@ TEMPLATE = """
                         {% else %}
                             <p>Status: <span>Not running</span></p>
                         {% endif %}
-                        <form method=\"post\" action=\"/run/{{ name }}\">
+                        <form method="POST" action="{{ url_for('run_script', script_name=name) }}">
+                            {% for arg in script.args %}
+                            <div class="form-group mb-2">
+                                <label for="arg-{{ name }}-{{ arg.name }}">{{ arg.label }}</label>
+                                {% set val = form_data.get(name, {}).get(arg.name) %}
+                                <input
+                                type="text"
+                                class="form-control"
+                                name="{{ arg.name }}"
+                                id="arg-{{ name }}-{{ arg.name }}"
+                                value="{{ val if val is not none else arg.default or '' }}"
+                                {% if arg.required %}required{% endif %}
+                                >
+                            </div>
+                            {% endfor %}                        
                             <button class=\"btn btn-primary\" type=\"submit\" {% if status == \"running\" %}disabled{% endif %}>Run Script</button>
                         </form>
                         {% if status == \"running\" %}
@@ -379,7 +393,7 @@ TEMPLATE = """
 </html>
 """
 
-def run_script_with_live_output(script_name):
+def run_script_with_live_output(script_name, arg_values=[]):
     execution_status[script_name] = "running"
     execution_logs[script_name] = []
     socketio.emit("status_update", {"script": script_name, "status": "running"})  # ← NEW
@@ -391,7 +405,7 @@ def run_script_with_live_output(script_name):
         script = SCRIPTS[script_name]
         script_path = os.path.abspath(script["path"])
         process = subprocess.Popen(
-            [sys.executable, "-u", script_path],
+            [sys.executable, "-u", script_path, *arg_values],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
@@ -437,6 +451,10 @@ def run_script_with_live_output(script_name):
 def home():
     version = read_version()
     current_year = datetime.now().year
+
+    # You could persist or pop depending on UX
+    form_data = session.get("form_data", {})  # { script_name: {arg: val, ...}, ... }
+
     return render_template_string(
         TEMPLATE,
         scripts=SCRIPTS,
@@ -444,7 +462,8 @@ def home():
         execution_logs=execution_logs,
         run_history=run_history,
         version=version,
-        year=current_year
+        year=current_year,
+        form_data=form_data
     )
 
 @app.route("/run/<script_name>", methods=["POST"])
@@ -457,7 +476,22 @@ def run_script(script_name):
         flash(f"Script '{script_name}' is already running.", "warning")
         return redirect(url_for("home"))
 
-    thread = threading.Thread(target=run_script_with_live_output, args=(script_name,))
+    script_args = SCRIPTS[script_name].get("args", [])
+    arg_values = []
+    form_data = {arg["name"]: request.form.get(arg["name"], "") for arg in script_args}
+
+    # Collect args for CLI execution
+    for arg in script_args:
+        value = form_data[arg["name"]]
+        if value:
+            arg_values.extend([f"--{arg['name']}", value])
+
+    # Store form data by script name
+    all_form_data = session.get("form_data", {})
+    all_form_data[script_name] = form_data
+    session["form_data"] = all_form_data
+
+    thread = threading.Thread(target=run_script_with_live_output, args=(script_name, arg_values))
     thread.start()
     flash(f"Started script '{script_name}'.", "info")
     return redirect(url_for("home"))

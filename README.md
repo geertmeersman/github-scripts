@@ -57,7 +57,7 @@ Built and maintained by [Geert Meersman](https://github.com/gmeersman)
 
 ```
 /scripts/github/
-├── auto_merge_dependabot.py     # Script: merge dependabot PRs
+├── auto_merge_prs.py            # Script: merge PRs
 ├── report_open_prs.py           # Script: send PR report
 ├── notify_utils.py              # Utilities: Email & Telegram
 ├── report_utils.py              # Utilities: HTML report wrapper
@@ -139,7 +139,7 @@ The dashboard will be available at: [http://localhost](http://localhost)
 
 | Time (UTC) | Script                  | Log File                                                 |
 | ---------- | ----------------------- | -------------------------------------------------------- |
-| 02:00      | `auto_merge_dependabot` | `/var/log/github-scripts/auto_merge_dependabot_cron.log` |
+| 02:00      | `auto_merge_prs` | `/var/log/github-scripts/auto_merge_prs_cron.log` |
 | 06:00      | `report_open_prs`       | `/var/log/github-scripts/report_open_prs_cron.log`       |
 
 Each job is executed through `cron_wrapper.py`, which logs stdout and stderr.
