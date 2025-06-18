@@ -16,8 +16,8 @@ HEADERS = {
 }
 
 unmerged_prs = []
+merged_prs = []
 processed_prs = []
-
 
 
 def get_repos():
@@ -48,37 +48,53 @@ def get_dependabot_prs(repo):
 
 def merge_pr(repo, pr):
     pr_number = pr['number']
+    pr_title = pr['title']
     pr_url = pr['html_url']
-    print(f"🔄 Attempting to merge PR #{pr_number} in {repo}")
+    print(f"🔄 Attempting to merge PR #{pr_number} - {pr_title} in {repo}")
 
-    details = requests.get(f"https://api.github.com/repos/{repo}/pulls/{pr_number}", headers=HEADERS, timeout=REQUESTS_TIMEOUT).json()
+    details_url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}"
+    details = requests.get(details_url, headers=HEADERS, timeout=REQUESTS_TIMEOUT).json()
+
     if details.get('mergeable') is not True:
-        print(f"⏭️ PR #{pr_number} is not mergeable yet")
-        unmerged_prs.append((repo, pr_number, pr_url, "Not mergeable"))
+        reason = details.get('mergeable_state', 'unknown')
+        reason_msg = "Merge conflict" if reason == "dirty" else f"Not mergeable ({reason})"
+        print(f"⏭️ PR #{pr_number} is not mergeable: {reason_msg}")
+        unmerged_prs.append((repo, pr_number, pr_title, pr_url, reason_msg))
         return
 
-    url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}/merge"
+    merge_url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}/merge"
     data = {
         "merge_method": MERGE_METHOD,
         "commit_title": f"Auto-merge PR #{pr_number} from Dependabot"
     }
-    response = requests.put(url, headers=HEADERS, json=data, timeout=REQUESTS_TIMEOUT)
+    response = requests.put(merge_url, headers=HEADERS, json=data, timeout=REQUESTS_TIMEOUT)
+
     if response.status_code == 200:
-        print(f"✅ Merged PR #{pr_number} in {repo}")
+        print(f"✅ Merged PR #{pr_number} - {pr_title} in {repo}")
+        merged_prs.append((repo, pr_number, pr_title, pr_url))
     else:
         error = response.json().get('message', 'Unknown error')
-        print(f"❌ Failed to merge PR #{pr_number} in {repo}: {error}")
-        unmerged_prs.append((repo, pr_number, pr_url, error))
+        print(f"❌ Failed to merge PR #{pr_number} - {pr_title} in {repo}: {error}")
+        unmerged_prs.append((repo, pr_number, pr_title, pr_url, error))
 
 
 def build_and_send_email():
-    subject = f"[Dependabot Auto-Merge] {len(unmerged_prs)} PR(s) not merged"
-    if unmerged_prs:
-        body = "<h3>Unmerged PRs</h3><ul>"
-        for repo, pr_number, url, reason in unmerged_prs:
-            body += f'<li><a href="{url}">{repo}#{pr_number}</a>: {reason}</li>'
+    subject = f"[Dependabot Auto-Merge] {len(unmerged_prs)} unmerged, {len(merged_prs)} merged"
+
+    body = ""
+    if merged_prs:
+        body += "<h3>Merged PRs</h3><ul>"
+        for repo, pr_number, title, url in merged_prs:
+            body += f'<li><a href="{url}">{repo}#{pr_number}</a>: {title}</li>'
         body += "</ul>"
-    else:
+
+    if unmerged_prs:
+        body += "<h3>Unmerged PRs</h3><ul>"
+        for repo, pr_number, title, url, reason in unmerged_prs:
+            body += f'<li><a href="{url}">{repo}#{pr_number}</a>: {title} — {reason}</li>'
+        body += "</ul>"
+
+    if not merged_prs and not unmerged_prs:
         body = "<p>All Dependabot PRs were merged successfully! 🎉</p>"
 
     html_report = wrap_html_report(
@@ -90,16 +106,18 @@ def build_and_send_email():
 
 
 def build_and_send_telegram():
-    if unmerged_prs:
-        icon = "⚠️"
-        status = f"{len(unmerged_prs)} PR(s) not merged"
-        message = "\n".join([f"[{repo}#{num}]({url}) — {reason}" for repo, num, url, reason in unmerged_prs])
-    else:
-        icon = "✅"
-        status = "All Dependabot PRs merged"
-        message = "Nothing left to review."
+    merged = "\n".join([f"✅ [{repo}#{num}]({url}) — {title}" for repo, num, title, url in merged_prs])
+    unmerged = "\n".join([f"⚠️ [{repo}#{num}]({url}) — {title} — {reason}" for repo, num, title, url, reason in unmerged_prs])
 
-    text = f"{icon} *[Dependabot Merge]* {status}\n{message}"
+    if not merged_prs and not unmerged_prs:
+        text = "✅ *[Dependabot Merge]* All Dependabot PRs merged\nNothing left to review."
+    else:
+        text = "*[Dependabot Merge]* Report:\n"
+        if merged:
+            text += f"\n*Merged PRs:*\n{merged}"
+        if unmerged:
+            text += f"\n\n*Unmerged PRs:*\n{unmerged}"
+
     send_telegram_report(text)
 
 
