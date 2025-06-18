@@ -9,5 +9,5 @@ SHELL=/bin/bash
 # │ │ │ │ ┌───────────── day of the week (0 - 6) (Sunday to Saturday)
 # │ │ │ │ │
 # │ │ │ │ │
-  0 2 * * * . /env.sh && python3 /home/cron_wrapper.py auto_merge_dependabot /home/auto_merge_dependabot.py >> /var/log/github-scripts/auto_merge_dependabot_cron.log 2>&1
+  0 2 * * * . /env.sh && python3 /home/cron_wrapper.py auto_merge_prs /home/auto_merge_prs.py >> /var/log/github-scripts/auto_merge_prs_cron.log 2>&1
   0 6 * * * . /env.sh && python3 /home/cron_wrapper.py report_open_prs /home/report_open_prs.py >> /var/log/github-scripts/report_open_prs_cron.log 2>&1
