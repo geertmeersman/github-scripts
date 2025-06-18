@@ -32,10 +32,9 @@ def is_safe_args(arg_list, allowed_args_config):
         if flag not in allowed_flags:
             return False, f"Unexpected flag: {flag}"
 
-        if flag == "--user":
-            # For example: allow GitHub usernames like 'geertmeersman' or 'dependabot[bot]'
-            if not re.fullmatch(r"[a-zA-Z0-9\[\]_-]{1,40}", value):
-                return False, f"Invalid value for {flag}: {value}"
+        # For example: allow GitHub usernames like 'geertmeersman' or 'dependabot[bot]'
+        if flag == "--user" and not re.fullmatch(r"[a-zA-Z0-9\[\]_-]{1,40}", value):
+            return False, f"Invalid value for {flag}: {value}"
 
         # You can extend validation here based on more metadata if needed
 
@@ -527,6 +526,7 @@ def run_script_with_live_output(script_name, arg_values=None):
             bufsize=1,  # Line-buffered output
             env=os.environ.copy()
         )
+        app.logger.info("Running script: %s %s", script_path, arg_values)
         script_threads[script_name] = {"thread": threading.current_thread(), "process": process}
 
         for line in iter(process.stdout.readline, ''):
