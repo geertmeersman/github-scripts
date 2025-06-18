@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.10.0](https://github.com/geertmeersman/github-scripts/tree/v0.10.0) (2025-06-18)
+
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.9.5...v0.10.0)
+
+**Merged pull requests:**
+
+- feat: script report open issues [\#42](https://github.com/geertmeersman/github-scripts/pull/42) ([geertmeersman](https://github.com/geertmeersman))
+- feat: arguments passing to auto\_merge [\#41](https://github.com/geertmeersman/github-scripts/pull/41) ([geertmeersman](https://github.com/geertmeersman))
+
 ## [v0.9.5](https://github.com/geertmeersman/github-scripts/tree/v0.9.5) (2025-06-18)
 
 [Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.9.4...v0.9.5)
