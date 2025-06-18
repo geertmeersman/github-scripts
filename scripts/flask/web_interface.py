@@ -669,7 +669,8 @@ def clear_logs():
             json.dump(run_history, f, indent=2)
         return jsonify({"message": "Logs and history cleared."}), 200
     except Exception as e:
-        return jsonify({"error": f"Failed to clear logs: {str(e)}"}), 500
+        app.logger.error(f"Failed to clear logs: {str(e)}")
+        return jsonify({"error": "An internal error occurred while clearing logs."}), 500
 
 @app.route("/health")
 def health():

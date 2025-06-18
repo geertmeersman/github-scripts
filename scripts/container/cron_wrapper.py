@@ -67,5 +67,6 @@ if __name__ == "__main__":
             log_file.write(f"\nException running script: {e}\n")
 
     end_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    duration_seconds = (end_time - start_time).total_seconds()
+    end_dt = datetime.datetime.now()
+    duration_seconds = (end_dt - start_dt).total_seconds()
     append_run_history(script_name, status, start_time, end_time, duration_seconds, log_filename)

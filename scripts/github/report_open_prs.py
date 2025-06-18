@@ -13,7 +13,7 @@ if not all([GITHUB_USER, GITHUB_TOKEN]):
     raise ValueError("❌ Missing one or more required environment variables.")
 
 HEADERS = {
-    "Authorization": f"Bearer {GITHUB_TOKEN}",
+    "Authorization": f"token {GITHUB_TOKEN}",
     "Accept": "application/vnd.github+json"
 }
 
