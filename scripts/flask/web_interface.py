@@ -1,10 +1,11 @@
 import os
 import sys
+import re
 import subprocess
 import threading
 from datetime import datetime
 import json
-from flask import Flask, jsonify, render_template_string, redirect, url_for, flash, send_file, request, session
+from flask import Flask, jsonify, render_template_string, send_file, request
 from flask_socketio import SocketIO
 
 app = Flask(__name__)
@@ -18,6 +19,27 @@ socketio = SocketIO(
     )
 )
 
+def is_safe_args(arg_list, allowed_args_config):
+    allowed_flags = {f"--{arg['name']}": arg for arg in allowed_args_config}
+
+    if len(arg_list) % 2 != 0:
+        return False, "Arguments must be in flag/value pairs"
+
+    for i in range(0, len(arg_list), 2):
+        flag = arg_list[i]
+        value = arg_list[i + 1]
+
+        if flag not in allowed_flags:
+            return False, f"Unexpected flag: {flag}"
+
+        # For example: allow GitHub usernames like 'geertmeersman' or 'dependabot[bot]'
+        if flag == "--user" and not re.fullmatch(r"[a-zA-Z0-9\[\]_-]{1,40}", value):
+            return False, f"Invalid value for {flag}: {value}"
+
+        # You can extend validation here based on more metadata if needed
+
+    return True, ""
+
 def read_version():
     try:
         with open("/VERSION", "r") as f:
@@ -26,7 +48,7 @@ def read_version():
         print(f"Error reading VERSION file: {e}")
         return "Unknown"
 
-SCRIPTS_FILE = "/home/scripts.json"
+SCRIPTS_FILE = "/home/scripts/scripts.json"
 
 def load_scripts():
     try:
@@ -122,6 +144,7 @@ TEMPLATE = """
         <h1 class="mb-4 header-title">
             <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub" width="32" height="32">
             GitHub Script Dashboard
+            <button class=\"btn btn-sm btn-secondary float-end\" onclick=\"showEnvModal()\">Show Environment</button>
         </h1>        
         <div class="mb-3">
             <span id="ws-status" class="badge bg-secondary">WebSocket: Connecting...</span>
@@ -141,41 +164,37 @@ TEMPLATE = """
             {% for name, script in scripts.items() %}
             <div class=\"col-md-6\">
                 <div class=\"card shadow-sm\">
-                    <div class=\"card-body\">
-                        <h5 class=\"card-title\">{{ name }}</h5>
-                        <p class=\"card-text\">{{ script.description }}</p>
+            
+            <div class=\"card-header d-flex justify-content-between align-items-center\" onclick=\"toggleCardBody(this)\" style=\"cursor: pointer;\">
+                        <strong>{{ name }}</strong>
                         {% set status = execution_status.get(name) %}
-                        {% if status == \"running\" %}
-                            <p>Status: <span class=\"status-running\">Running...</span></p>
-                        {% elif status == \"success\" %}
-                            <p>Status: <span class=\"status-success\">Success ✔</span></p>
-                        {% elif status == \"error\" %}
-                            <p>Status: <span class=\"status-error\">Error ✘</span></p>
+                        {% if status == 'running' %}
+                            <span class=\"status-running\">Running...</span>
+                        {% elif status == 'success' %}
+                            <span class=\"status-success\">Success ✔</span>
+                        {% elif status == 'error' %}
+                            <span class=\"status-error\">Error ✘</span>
+                        {% elif status == 'aborted' %}
+                            <span class=\"text-warning fw-bold\">Aborted ⚠</span>                            
                         {% else %}
-                            <p>Status: <span>Not running</span></p>
+                            <span>Not running</span>
                         {% endif %}
-                        <form method="POST" action="{{ url_for('run_script', script_name=name) }}">
+                    </div>
+                    <div class=\"card-body d-none\">
+                        <p>{{ script.description }}</p>
+                        <form onsubmit=\"return runScript(event, '{{ name }}')\">
                             {% for arg in script.args %}
-                            <div class="form-group mb-2">
-                                <label for="arg-{{ name }}-{{ arg.name }}">{{ arg.label }}</label>
-                                {% set val = form_data.get(name, {}).get(arg.name) %}
-                                <input
-                                type="text"
-                                class="form-control"
-                                name="{{ arg.name }}"
-                                id="arg-{{ name }}-{{ arg.name }}"
-                                value="{{ val if val is not none else arg.default or '' }}"
-                                {% if arg.required %}required{% endif %}
-                                >
+                            <div class=\"form-group mb-2\">
+                                {% set safe_name = name|replace(' ', '_') %}
+                                <label for=\"arg-{{ safe_name }}-{{ arg.name }}\">{{ arg.label }}</label>
+                                <input type=\"text\" class=\"form-control\" name=\"{{ arg.name }}\" id=\"arg-{{ safe_name }}-{{ arg.name }}\" value=\"{{ arg.default or '' }}\" {% if arg.required %}required{% endif %}>
                             </div>
-                            {% endfor %}                        
-                            <button class=\"btn btn-primary\" type=\"submit\" {% if status == \"running\" %}disabled{% endif %}>Run Script</button>
+                            {% endfor %}
+                            <button class=\"btn btn-primary run-btn\" type=\"submit\" {% if status == 'running' %}style=\"display:none;\"{% endif %}>Run Script</button>
                         </form>
-                        {% if status == \"running\" %}
-                        <form method=\"post\" action=\"/cancel/{{ name }}\" class=\"mt-2\">
+                        <form onsubmit=\"return cancelScript(event, '{{ name }}')\" class=\"mt-2 cancel-form\" {% if status != 'running' %}style=\"display:none;\"{% endif %}>
                             <button class=\"btn btn-danger btn-sm\">Cancel Script</button>
                         </form>
-                        {% endif %}
                         <a href=\"/download/{{ name }}\" class=\"btn btn-secondary mt-2\">Download</a>
                         <div class=\"output mt-3\">
                             <h6>Live Output:</h6>
@@ -186,11 +205,15 @@ TEMPLATE = """
             </div>
             {% endfor %}
         </div>
-        <h3 class="mt-4">Run History</h3>
+
+        <h3 class=\"mt-4 d-flex justify-content-between align-items-center\">
+            <span>Run History</span>
+            <button onclick=\"clearLogs()\" class=\"btn btn-sm btn-warning\">Clear Logs</button>
+        </h3>
         <div class="table-responsive">
             <table class="table table-striped">
                 <thead>
-                    <tr><th>Script</th><th>Start</th><th>End</th><th>Status</th></tr>
+                    <tr><th>Script</th><th>Start</th><th>End</th><th>Duration</th><th>Status</th></tr>
                 </thead>
                 <tbody id="run-history-body"></tbody>
             </table>
@@ -211,7 +234,19 @@ TEMPLATE = """
         </div>
       </div>
     </div>
-
+    <div class=\"modal fade\" id=\"envModal\" tabindex=\"-1\" aria-labelledby=\"envModalLabel\" aria-hidden=\"true\">
+        <div class=\"modal-dialog modal-lg\">
+            <div class=\"modal-content\">
+            <div class=\"modal-header\">
+                <h5 class=\"modal-title\" id=\"envModalLabel\">Environment Variables</h5>
+                <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" aria-label=\"Close\"></button>
+            </div>
+            <div class=\"modal-body\" id=\"env-modal-body\">
+                <pre id=\"env-content\">Loading...</pre>
+            </div>
+            </div>
+        </div>
+    </div>
     <script src=\"https://cdn.socket.io/4.7.2/socket.io.min.js\"></script>
     <script>
         const socket = io({
@@ -271,35 +306,40 @@ TEMPLATE = """
             }
         });
         socket.on("status_update", (data) => {
-        const titleElements = Array.from(document.querySelectorAll(".card-title"));
-        for (const titleEl of titleElements) {
-            if (titleEl.textContent.trim() === data.script) {
-            const card = titleEl.closest(".card");
-            const statusSpan = card.querySelector("p span");
-
-            if (statusSpan) {
-                if (data.status === "running") {
-                statusSpan.className = "status-running";
-                statusSpan.textContent = "Running...";
-                } else if (data.status === "success") {
-                statusSpan.className = "status-success";
-                statusSpan.textContent = "Success ✔";
-                } else if (data.status === "error") {
-                statusSpan.className = "status-error";
-                statusSpan.textContent = "Error ✘";
+            const headers = document.querySelectorAll(".card-header");
+            headers.forEach(header => {
+                if (header.textContent.trim().startsWith(data.script)) {
+                    const card = header.closest(".card");
+                    const statusSpan = header.querySelector("span");
+                    if (statusSpan) {
+                        if (data.status === "running") {
+                            statusSpan.className = "status-running";
+                            statusSpan.textContent = "Running...";
+                        } else if (data.status === "success") {
+                            statusSpan.className = "status-success";
+                            statusSpan.textContent = "Success ✔";
+                        } else if (data.status === "error") {
+                            statusSpan.className = "status-error";
+                            statusSpan.textContent = "Error ✘";
+                        } else if (data.status === "aborted") {
+                            statusSpan.className = "text-warning fw-bold";
+                            statusSpan.textContent = "Aborted ⚠";
+                        } else {
+                            statusSpan.className = "";
+                            statusSpan.textContent = "Not running";
+                        }
+                    }
+                    const runBtn = card.querySelector(".run-btn");
+                    const cancelForm = card.querySelector(".cancel-form");
+                    if (data.status === "running") {
+                        if (runBtn) runBtn.style.display = "none";
+                        if (cancelForm) cancelForm.style.display = "block";
+                    } else {
+                        if (runBtn) runBtn.style.display = "inline-block";
+                        if (cancelForm) cancelForm.style.display = "none";
+                    }
                 }
-            }
-
-            // Enable or disable buttons accordingly
-            const runButton = card.querySelector("form[action^='/run/'] button");
-            const cancelForm = card.querySelector("form[action^='/cancel/']");
-            if (runButton) runButton.disabled = (data.status === "running");
-
-            if (cancelForm) {
-                cancelForm.style.display = (data.status === "running") ? "block" : "none";
-            }
-            }
-        }
+            });
         });
 
         let currentPage = 1;
@@ -349,6 +389,7 @@ TEMPLATE = """
                             <td>${record.script}</td>
                             <td>${formatSimpleDate(record.start)}</td>
                             <td>${formatSimpleDate(record.end)}</td>
+                            <td>${(record.duration || 0).toFixed(1)}s</td>
                             <td>${record.status}</td>
                         `;
                         tbody.appendChild(row);
@@ -374,9 +415,74 @@ TEMPLATE = """
                 });
         }
 
-        setInterval(() => loadHistoryPage(currentPage), 5000); // auto refresh
+        function showEnvModal() {
+            fetch('/env')
+                .then(res => res.json())
+                .then(data => {
+                    const pre = document.getElementById("env-content");
+                    pre.textContent = Object.entries(data).map(([key, val]) => `${key}=${val}`).join("\\n");
+                    const modal = new bootstrap.Modal(document.getElementById("envModal"));
+                    modal.show();
+                })
+                .catch(err => alert("Failed to load environment variables: " + err));
+        }
+
+        function toggleCardBody(header) {
+            const cardBody = header.nextElementSibling;
+            cardBody.classList.toggle("d-none");
+        }
+
+        function runScript(event, scriptName) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+
+            fetch(`/run/${scriptName}`, {
+                method: "POST",
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                showToast(data.error ? "danger" : "info", data.message || data.error);
+            })
+            .catch(err => showToast("danger", "Failed to start script."));
+            return false;
+        }
+
+        function cancelScript(event, scriptName) {
+            event.preventDefault();
+            fetch(`/cancel/${scriptName}`, { method: "POST" })
+            .then(res => res.json())
+            .then(data => {
+                showToast(data.error ? "danger" : "warning", data.message || data.error);
+            })
+            .catch(err => showToast("danger", "Failed to cancel script."));
+            return false;
+        }
+
+        function showToast(type, message) {
+            const toast = document.createElement("div");
+            toast.className = `toast align-items-center text-white bg-${type} border-0 show`;
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>`;
+            document.getElementById("toast-container").appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+        }
+
+        function clearLogs() {
+            if (!confirm("Are you sure you want to delete all logs and history?")) return;
+            fetch("/clear_logs", { method: "POST" })
+                .then(res => res.json())
+                .then(data => showToast("warning", data.message || data.error))
+                .catch(err => showToast("danger", "Failed to clear logs."));
+        }
+                setInterval(() => loadHistoryPage(currentPage), 5000); // auto refresh
         loadHistoryPage(currentPage); // initial load
     </script>
+    
     <script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js\"></script>
     <footer class="footer">
         <div>
@@ -393,17 +499,25 @@ TEMPLATE = """
 </html>
 """
 
-def run_script_with_live_output(script_name, arg_values=[]):
+def run_script_with_live_output(script_name, arg_values=None):
+    if arg_values is None:
+        arg_values = []
     execution_status[script_name] = "running"
     execution_logs[script_name] = []
     socketio.emit("status_update", {"script": script_name, "status": "running"})  # ← NEW
 
-    start_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    start_time = datetime.now()
+    start_str = start_time.strftime('%Y-%m-%d_%H-%M-%S')
     end_time = None
 
     try:
         script = SCRIPTS[script_name]
         script_path = os.path.abspath(script["path"])
+        arg_definitions = script.get("args", [])
+        # Validate user-provided args
+        valid, reason = is_safe_args(arg_values, arg_definitions)
+        if not valid:
+            raise ValueError(f"Unsafe or invalid arguments: {reason}")
         process = subprocess.Popen(
             [sys.executable, "-u", script_path, *arg_values],
             stdout=subprocess.PIPE,
@@ -412,6 +526,7 @@ def run_script_with_live_output(script_name, arg_values=[]):
             bufsize=1,  # Line-buffered output
             env=os.environ.copy()
         )
+        app.logger.info("Running script: %s %s", script_path, arg_values)
         script_threads[script_name] = {"thread": threading.current_thread(), "process": process}
 
         for line in iter(process.stdout.readline, ''):
@@ -420,23 +535,30 @@ def run_script_with_live_output(script_name, arg_values=[]):
             socketio.emit("log_update", {"script": script_name, "line": line})
 
         process.wait()
-        if process.returncode == 0:
+        if execution_status[script_name] == "aborted":
+            # Already handled by cancel route
+            pass
+        elif process.returncode == 0:
             execution_status[script_name] = "success"
-            socketio.emit("status_update", {"script": script_name, "status": "success"})  # ← NEW
+            socketio.emit("status_update", {"script": script_name, "status": "success"})
         else:
             execution_status[script_name] = "error"
-            socketio.emit("status_update", {"script": script_name, "status": "error"})  # ← NEW
+            socketio.emit("status_update", {"script": script_name, "status": "error"})
     except Exception as e:
         execution_logs[script_name].append(f"Exception: {str(e)}")
-        execution_status[script_name] = "error"
-        socketio.emit("status_update", {"script": script_name, "status": "error"})  # ← NEW
+        if execution_status[script_name] != "aborted":
+            execution_status[script_name] = "error"
+            socketio.emit("status_update", {"script": script_name, "status": "error"})
     finally:
-        end_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        log_filename = f"{script_name}_{start_time.replace(':', '-')}.log"
+        end_time = datetime.now()
+        end_str = end_time.strftime('%Y-%m-%d_%H-%M-%S')
+        duration_seconds = (end_time - start_time).total_seconds()
+        log_filename = f"{script_name}_{start_str.replace(':', '-')}.log"
         run_history.append({
             "script": script_name,
-            "start": start_time,
-            "end": end_time,
+            "start": start_str,
+            "end": end_str,
+            "duration": duration_seconds,
             "status": execution_status[script_name],
             "log_file": log_filename
         })
@@ -447,14 +569,10 @@ def run_script_with_live_output(script_name, arg_values=[]):
         with open(log_path, "w") as log_file:
             log_file.write("\n".join(execution_logs[script_name]))
 
-@app.route("/", methods=["GET"])
+@app.route("/")
 def home():
     version = read_version()
-    current_year = datetime.now().year
-
-    # You could persist or pop depending on UX
-    form_data = session.get("form_data", {})  # { script_name: {arg: val, ...}, ... }
-
+    year = datetime.now().year
     return render_template_string(
         TEMPLATE,
         scripts=SCRIPTS,
@@ -462,39 +580,25 @@ def home():
         execution_logs=execution_logs,
         run_history=run_history,
         version=version,
-        year=current_year,
-        form_data=form_data
+        year=year
     )
-
 @app.route("/run/<script_name>", methods=["POST"])
 def run_script(script_name):
     if script_name not in SCRIPTS:
-        flash(f"Error: Unknown script '{script_name}'", "danger")
-        return redirect(url_for("home"))
-
+        return jsonify({"error": f"Unknown script '{script_name}'"}), 400
     if execution_status.get(script_name) == "running":
-        flash(f"Script '{script_name}' is already running.", "warning")
-        return redirect(url_for("home"))
+        return jsonify({"error": f"Script '{script_name}' is already running."}), 409
 
     script_args = SCRIPTS[script_name].get("args", [])
     arg_values = []
-    form_data = {arg["name"]: request.form.get(arg["name"], "") for arg in script_args}
-
-    # Collect args for CLI execution
     for arg in script_args:
-        value = form_data[arg["name"]]
+        value = request.form.get(arg["name"], "")
         if value:
             arg_values.extend([f"--{arg['name']}", value])
 
-    # Store form data by script name
-    all_form_data = session.get("form_data", {})
-    all_form_data[script_name] = form_data
-    session["form_data"] = all_form_data
-
     thread = threading.Thread(target=run_script_with_live_output, args=(script_name, arg_values))
     thread.start()
-    flash(f"Started script '{script_name}'.", "info")
-    return redirect(url_for("home"))
+    return jsonify({"message": f"Started script '{script_name}'."}), 200
 
 @app.route("/cancel/<script_name>", methods=["POST"])
 def cancel_script(script_name):
@@ -503,15 +607,14 @@ def cancel_script(script_name):
         process = thread_info["process"]
         if process.poll() is None:
             process.terminate()
-            execution_status[script_name] = "error"
+            execution_status[script_name] = "aborted"
             execution_logs[script_name].append("Script was aborted by user.")
-            socketio.emit("status_update", {"script": script_name, "status": "error"})  # ← NEW
-            flash(f"Aborted script '{script_name}'.", "warning")
+            socketio.emit("status_update", {"script": script_name, "status": "aborted"})
+            return jsonify({"message": f"Aborted script '{script_name}'."}), 200
         else:
-            flash(f"Script '{script_name}' already finished.", "info")
+            return jsonify({"message": f"Script '{script_name}' already finished."}), 200
     else:
-        flash(f"No running script found for '{script_name}'.", "danger")
-    return redirect(url_for("home"))
+        return jsonify({"error": f"No running script found for '{script_name}'."}), 404
 
 @app.route("/logs", methods=["GET"])
 def logs():
@@ -523,6 +626,17 @@ def download_script(script_name):
         return "Script not found", 404
     path = SCRIPTS[script_name]["path"]
     return send_file(path, as_attachment=True)
+
+@app.route("/env")
+def environment_variables():
+    hidden_keys = ["GITHUB_TOKEN", "TELEGRAM_BOT_ID", "SMTP_PWD", "GPG_KEY", "PYTHON_SHA256"]
+    safe_env = {}
+    for k, v in os.environ.items():
+        if any(sensitive in k.upper() for sensitive in hidden_keys):
+            safe_env[k] = "***FILTERED***"
+        else:
+            safe_env[k] = v
+    return jsonify(safe_env)
 
 @app.route("/logfile/<log_filename>")
 def get_logfile(log_filename):
@@ -567,6 +681,24 @@ def get_history():
         "pages": pages,
         "total": total
     })
+
+@app.route("/clear_logs", methods=["POST"])
+def clear_logs():
+    try:
+        global run_history
+        for record in run_history:
+            log_file = record.get("log_file")
+            if log_file:
+                log_path = os.path.join(LOG_DIR, log_file)
+                if os.path.exists(log_path):
+                    os.remove(log_path)
+        run_history = []
+        with open(HISTORY_FILE, "w") as f:
+            json.dump(run_history, f, indent=2)
+        return jsonify({"message": "Logs and history cleared."}), 200
+    except Exception as e:
+        app.logger.error(f"Failed to clear logs: {str(e)}")
+        return jsonify({"error": "An internal error occurred while clearing logs."}), 500
 
 @app.route("/health")
 def health():
