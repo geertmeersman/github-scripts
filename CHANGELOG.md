@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.9.5](https://github.com/geertmeersman/github-scripts/tree/v0.9.5) (2025-06-18)
+
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.9.4...v0.9.5)
+
+**Merged pull requests:**
+
+- feat: include PR titles in auto merge report [\#40](https://github.com/geertmeersman/github-scripts/pull/40) ([geertmeersman](https://github.com/geertmeersman))
+- fix: add octocat favicon [\#39](https://github.com/geertmeersman/github-scripts/pull/39) ([geertmeersman](https://github.com/geertmeersman))
+
 ## [v0.9.4](https://github.com/geertmeersman/github-scripts/tree/v0.9.4) (2025-06-13)
 
 [Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.9.3...v0.9.4)
@@ -125,19 +134,19 @@
 
 ## [v0.5.5](https://github.com/geertmeersman/github-scripts/tree/v0.5.5) (2025-06-08)
 
-[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.5.3...v0.5.5)
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.5.4...v0.5.5)
 
 **Merged pull requests:**
 
 - fix: eventlet for websocket [\#20](https://github.com/geertmeersman/github-scripts/pull/20) ([geertmeersman](https://github.com/geertmeersman))
 
-## [v0.5.3](https://github.com/geertmeersman/github-scripts/tree/v0.5.3) (2025-06-08)
-
-[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.5.4...v0.5.3)
-
 ## [v0.5.4](https://github.com/geertmeersman/github-scripts/tree/v0.5.4) (2025-06-08)
 
-[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.5.2...v0.5.4)
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.5.3...v0.5.4)
+
+## [v0.5.3](https://github.com/geertmeersman/github-scripts/tree/v0.5.3) (2025-06-08)
+
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.5.2...v0.5.3)
 
 ## [v0.5.2](https://github.com/geertmeersman/github-scripts/tree/v0.5.2) (2025-06-08)
 
