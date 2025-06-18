@@ -40,7 +40,7 @@ chmod +x /env.sh
 log "[INFO] Starting cron..."
 cron
 log "[INFO] Describing cron jobs..."
-python3 /home/describe_cron.py
+python3 /home/cron/describe_cron.py
 
 # Start Flask app
 WEB_PORT="${WEB_PORT:-80}"

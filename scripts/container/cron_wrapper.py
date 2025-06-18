@@ -9,11 +9,12 @@ LOG_DIR = "/var/log/github-scripts"
 HISTORY_FILE = os.path.join(LOG_DIR, "script_run_history.json")
 os.makedirs(LOG_DIR, exist_ok=True)
 
-def append_run_history(script_name, status, start_time, end_time, log_filename):
+def append_run_history(script_name, status, start_time, end_time, duration_seconds, log_filename):
     record = {
         "script": script_name,
         "start": start_time,
         "end": end_time,
+        "duration": duration_seconds,
         "status": status,
         "log_file": log_filename
     }
@@ -66,4 +67,5 @@ if __name__ == "__main__":
             log_file.write(f"\nException running script: {e}\n")
 
     end_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    append_run_history(script_name, status, start_time, end_time, log_filename)
+    duration_seconds = (end_time - start_time).total_seconds()
+    append_run_history(script_name, status, start_time, end_time, duration_seconds, log_filename)

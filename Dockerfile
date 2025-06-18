@@ -8,15 +8,11 @@ RUN apt-get update && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Copy Python scripts into container
-COPY scripts/github/auto_merge_prs.py /home/auto_merge_prs.py
-COPY scripts/github/report_open_prs.py /home/report_open_prs.py
-COPY scripts/github/scripts.json /home/scripts.json
+COPY scripts/github/* /home/scripts/
+RUN chmod +x /home/scripts/*.py
 
-COPY scripts/github/notify_utils.py /home/notify_utils.py
-COPY scripts/github/report_utils.py /home/report_utils.py
-
-COPY scripts/container/describe_cron.py /home/describe_cron.py
-COPY scripts/container/cron_wrapper.py /home/cron_wrapper.py
+COPY scripts/container/describe_cron.py /home/cron/describe_cron.py
+COPY scripts/container/cron_wrapper.py /home/cron/cron_wrapper.py
 COPY scripts/flask/web_interface.py /home/web_interface.py
 
 # Copy entrypoint and make it executable

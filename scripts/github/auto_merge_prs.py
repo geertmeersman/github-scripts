@@ -13,8 +13,12 @@ REQUESTS_TIMEOUT = 10
 
 HEADERS = {
     "Authorization": f"token {GITHUB_TOKEN}",
-    "Accept": "application/vnd.github.v3+json"
+    "Accept": "application/vnd.github.v3+json",
+    "User-Agent": "github-scripts-bot"
 }
+
+if not all([GITHUB_USER, GITHUB_TOKEN]):
+    raise ValueError("❌ Missing one or more required environment variables.")
 
 unmerged_prs = []
 merged_prs = []
@@ -93,7 +97,7 @@ def merge_pr(repo, pr, target_user):
     merge_url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}/merge"
     data = {
         "merge_method": MERGE_METHOD,
-        "commit_title": f"Auto-merge PR #{pr_number} from {target_user}"
+        "commit_title": f"Auto-merge PR #{pr_number}: {pr_title}"
     }
     response = requests.put(merge_url, headers=HEADERS, json=data, timeout=REQUESTS_TIMEOUT)
 
@@ -169,7 +173,11 @@ def main():
     Sends a report via email and Telegram.
     """
     parser = argparse.ArgumentParser(description="Auto-merge PRs for a specified user (default: dependabot[bot])")
-    parser.add_argument("--user", default="dependabot[bot]", help="GitHub username to auto-merge PRs for")
+    parser.add_argument(
+        "--user", 
+        default=os.getenv("AUTO_MERGE_USER", "dependabot[bot]"),
+        help="GitHub username to auto-merge PRs for"
+    )
     args = parser.parse_args()
     target_user = args.user
 

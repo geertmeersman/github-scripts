@@ -1,6 +1,6 @@
 {
   "auto_merge_prs": {
-    "path": "/home/auto_merge_prs.py",
+    "path": "/home/scripts/auto_merge_prs.py",
     "description": "Automatically merge open PRs (default for user dependabot[bot]) and notify via email and Telegram.",
     "args": [
       {
@@ -12,8 +12,13 @@
     ]
   },
     "report_open_prs": {
-    "path": "/home/report_open_prs.py",
+    "path": "/home/scripts/report_open_prs.py",
     "description": "Generates a categorized GitHub pull request report for a user and emails it as a styled HTML summary.",
+    "args": []
+  },
+    "report_open_issues": {
+    "path": "/home/scripts/report_open_issues.py",
+    "description": "Fetches and emails a report of open GitHub issues related to the user, including labels and comment counts.",
     "args": []
   }
 }
