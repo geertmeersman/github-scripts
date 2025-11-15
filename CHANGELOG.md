@@ -1,5 +1,40 @@
 # Changelog
 
+## [v1.0.0](https://github.com/geertmeersman/github-scripts/tree/v1.0.0) (2025-11-15)
+
+[Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.10.0...v1.0.0)
+
+**Merged pull requests:**
+
+- chore: requirements cleanup [\#70](https://github.com/geertmeersman/github-scripts/pull/70) ([geertmeersman](https://github.com/geertmeersman))
+- chore\(deps\): bump ruff from 0.14.3 to 0.14.4 [\#69](https://github.com/geertmeersman/github-scripts/pull/69) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump ruff from 0.14.2 to 0.14.3 [\#68](https://github.com/geertmeersman/github-scripts/pull/68) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump ruff from 0.14.1 to 0.14.2 [\#67](https://github.com/geertmeersman/github-scripts/pull/67) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): update pip requirement from \<25.3,\>=8.0.3 to \>=8.0.3,\<25.4 [\#66](https://github.com/geertmeersman/github-scripts/pull/66) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump ruff from 0.14.0 to 0.14.1 [\#65](https://github.com/geertmeersman/github-scripts/pull/65) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github/codeql-action from 3 to 4 [\#64](https://github.com/geertmeersman/github-scripts/pull/64) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump ruff from 0.13.3 to 0.14.0 [\#63](https://github.com/geertmeersman/github-scripts/pull/63) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump ruff from 0.13.2 to 0.13.3 [\#62](https://github.com/geertmeersman/github-scripts/pull/62) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump ruff from 0.13.1 to 0.13.2 [\#61](https://github.com/geertmeersman/github-scripts/pull/61) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump ruff from 0.13.0 to 0.13.1 [\#60](https://github.com/geertmeersman/github-scripts/pull/60) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump ruff from 0.12.12 to 0.13.0 [\#59](https://github.com/geertmeersman/github-scripts/pull/59) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump ruff from 0.12.10 to 0.12.12 [\#58](https://github.com/geertmeersman/github-scripts/pull/58) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump actions/setup-python from 5 to 6 [\#57](https://github.com/geertmeersman/github-scripts/pull/57) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump actions/github-script from 7 to 8 [\#56](https://github.com/geertmeersman/github-scripts/pull/56) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump ruff from 0.12.9 to 0.12.10 [\#55](https://github.com/geertmeersman/github-scripts/pull/55) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump ruff from 0.12.8 to 0.12.9 [\#54](https://github.com/geertmeersman/github-scripts/pull/54) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump ruff from 0.12.7 to 0.12.8 [\#53](https://github.com/geertmeersman/github-scripts/pull/53) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump actions/checkout from 4 to 5 [\#52](https://github.com/geertmeersman/github-scripts/pull/52) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump ruff from 0.12.5 to 0.12.7 [\#51](https://github.com/geertmeersman/github-scripts/pull/51) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): update pip requirement from \<25.2,\>=8.0.3 to \>=8.0.3,\<25.3 [\#50](https://github.com/geertmeersman/github-scripts/pull/50) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump hugo19941994/delete-draft-releases from 1.0.1 to 2.0.0 [\#49](https://github.com/geertmeersman/github-scripts/pull/49) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump ruff from 0.12.4 to 0.12.5 [\#48](https://github.com/geertmeersman/github-scripts/pull/48) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump ruff from 0.12.3 to 0.12.4 [\#47](https://github.com/geertmeersman/github-scripts/pull/47) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump ruff from 0.12.2 to 0.12.3 [\#46](https://github.com/geertmeersman/github-scripts/pull/46) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump ruff from 0.12.1 to 0.12.2 [\#45](https://github.com/geertmeersman/github-scripts/pull/45) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump ruff from 0.12.0 to 0.12.1 [\#44](https://github.com/geertmeersman/github-scripts/pull/44) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump ruff from 0.11.13 to 0.12.0 [\#43](https://github.com/geertmeersman/github-scripts/pull/43) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 ## [v0.10.0](https://github.com/geertmeersman/github-scripts/tree/v0.10.0) (2025-06-18)
 
 [Full Changelog](https://github.com/geertmeersman/github-scripts/compare/v0.9.5...v0.10.0)
