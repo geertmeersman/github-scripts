@@ -14,8 +14,7 @@ socketio = SocketIO(
     app,
     async_mode="eventlet",
     cors_allowed_origins=os.environ.get(
-        "CORS_ALLOWED_ORIGINS",
-        "https://github.bee.mgweb.be"
+        "CORS_ALLOWED_ORIGINS"
     )
 )
 
