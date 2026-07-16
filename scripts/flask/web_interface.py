@@ -11,11 +11,17 @@ from flask_socketio import SocketIO
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "default-secret")
-socketio = SocketIO(
-    app,
-    async_mode="eventlet",
-    cors_allowed_origins=os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",")
-)
+cors_env = os.environ.get("CORS_ALLOWED_ORIGINS", "").strip()  
+if not cors_env or cors_env == "*":  
+    cors_origins = "*"  
+else:  
+    cors_origins = [origin.strip() for origin in cors_env.split(",")]  
+
+socketio = SocketIO(  
+    app,  
+    async_mode="eventlet",  
+    cors_allowed_origins=cors_origins  
+)  
 
 def is_safe_args(arg_list, allowed_args_config):
     allowed_flags = {f"--{arg['name']}": arg for arg in allowed_args_config}
