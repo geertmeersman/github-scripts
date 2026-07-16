@@ -1,22 +1,27 @@
+import json
 import os
-import sys
 import re
 import subprocess
+import sys
 import threading
 from datetime import datetime
-import json
-from flask import Flask, jsonify, render_template_string, send_file, request
+
+from flask import Flask, jsonify, render_template_string, request, send_file
 from flask_socketio import SocketIO
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "default-secret")
-socketio = SocketIO(
-    app,
-    async_mode="eventlet",
-    cors_allowed_origins=os.environ.get(
-        "CORS_ALLOWED_ORIGINS"
-    )
-)
+cors_env = os.environ.get("CORS_ALLOWED_ORIGINS", "").strip()  
+if not cors_env or cors_env == "*":  
+    cors_origins = "*"  
+else:  
+    cors_origins = [origin.strip() for origin in cors_env.split(",")]  
+
+socketio = SocketIO(  
+    app,  
+    async_mode="eventlet",  
+    cors_allowed_origins=cors_origins  
+)  
 
 def is_safe_args(arg_list, allowed_args_config):
     allowed_flags = {f"--{arg['name']}": arg for arg in allowed_args_config}
@@ -218,7 +223,7 @@ TEMPLATE = """
             </table>
         </div>
         <nav>
-            <ul class="pagination" id="history-pagination"></ul>
+            <ul class="pagination justify-content-center" id="history-pagination"></ul>
         </nav>
     </div>
 
@@ -396,18 +401,32 @@ TEMPLATE = """
 
                     const pagination = document.getElementById("history-pagination");
                     pagination.innerHTML = "";
+                    const totalPages = data.pages;
+                    const page = data.page;
+                    const maxVisible = 10;
 
-                    for (let i = 1; i <= data.pages; i++) {
+                    function addPage(label, pageNum, disabled, active) {
                         const li = document.createElement("li");
-                        li.className = `page-item ${i === data.page ? 'active' : ''}`;
-                        li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                        li.className = `page-item ${active ? 'active' : ''} ${disabled ? 'disabled' : ''}`;
+                        li.innerHTML = `<a class="page-link" href="#">${label}</a>`;
                         li.onclick = (e) => {
                             e.preventDefault();
-                            currentPage = i;
-                            loadHistoryPage(i);
+                            if (!disabled && !active) {
+                                currentPage = pageNum;
+                                loadHistoryPage(pageNum);
+                            }
                         };
                         pagination.appendChild(li);
                     }
+
+                    addPage('&laquo;', page - 1, page <= 1, false);
+                    let start = Math.max(1, page - Math.floor(maxVisible / 2));
+                    let end = Math.min(totalPages, start + maxVisible - 1);
+                    start = Math.max(1, end - maxVisible + 1);
+                    if (start > 1) { addPage(1, 1, false, false); if (start > 2) addPage('...', 0, true, false); }
+                    for (let i = start; i <= end; i++) addPage(i, i, false, i === page);
+                    if (end < totalPages) { if (end < totalPages - 1) addPage('...', 0, true, false); addPage(totalPages, totalPages, false, false); }
+                    addPage('&raquo;', page + 1, page >= totalPages, false);
 
                     // ✅ Re-bind clicks **after** DOM update
                     bindHistoryRowClicks();
