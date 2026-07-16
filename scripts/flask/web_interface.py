@@ -217,7 +217,7 @@ TEMPLATE = """
             </table>
         </div>
         <nav>
-            <ul class="pagination" id="history-pagination"></ul>
+            <ul class="pagination justify-content-center" id="history-pagination"></ul>
         </nav>
     </div>
 
@@ -395,18 +395,28 @@ TEMPLATE = """
 
                     const pagination = document.getElementById("history-pagination");
                     pagination.innerHTML = "";
+                    const totalPages = data.pages;
+                    const page = data.page;
+                    const maxVisible = 10;
 
-                    for (let i = 1; i <= data.pages; i++) {
+                    function addPage(label, pageNum, disabled, active) {
                         const li = document.createElement("li");
-                        li.className = `page-item ${i === data.page ? 'active' : ''}`;
-                        li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
-                        li.onclick = (e) => {
-                            e.preventDefault();
-                            currentPage = i;
-                            loadHistoryPage(i);
-                        };
+                        li.className = `page-item ${active ? 'active' : ''} ${disabled ? 'disabled' : ''}`;
+                        li.innerHTML = `<a class="page-link" href="#">${label}</a>`;
+                        if (!disabled && !active) {
+                            li.onclick = (e) => { e.preventDefault(); currentPage = pageNum; loadHistoryPage(pageNum); };
+                        }
                         pagination.appendChild(li);
                     }
+
+                    addPage('&laquo;', page - 1, page === 1, false);
+                    let start = Math.max(1, page - Math.floor(maxVisible / 2));
+                    let end = Math.min(totalPages, start + maxVisible - 1);
+                    start = Math.max(1, end - maxVisible + 1);
+                    if (start > 1) { addPage(1, 1, false, false); if (start > 2) addPage('...', 0, true, false); }
+                    for (let i = start; i <= end; i++) addPage(i, i, false, i === page);
+                    if (end < totalPages) { if (end < totalPages - 1) addPage('...', 0, true, false); addPage(totalPages, totalPages, false, false); }
+                    addPage('&raquo;', page + 1, page === totalPages, false);
 
                     // ✅ Re-bind clicks **after** DOM update
                     bindHistoryRowClicks();
