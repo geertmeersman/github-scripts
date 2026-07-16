@@ -403,20 +403,24 @@ TEMPLATE = """
                         const li = document.createElement("li");
                         li.className = `page-item ${active ? 'active' : ''} ${disabled ? 'disabled' : ''}`;
                         li.innerHTML = `<a class="page-link" href="#">${label}</a>`;
-                        if (!disabled && !active) {
-                            li.onclick = (e) => { e.preventDefault(); currentPage = pageNum; loadHistoryPage(pageNum); };
-                        }
+                        li.onclick = (e) => {
+                            e.preventDefault();
+                            if (!disabled && !active) {
+                                currentPage = pageNum;
+                                loadHistoryPage(pageNum);
+                            }
+                        };
                         pagination.appendChild(li);
                     }
 
-                    addPage('&laquo;', page - 1, page === 1, false);
+                    addPage('&laquo;', page - 1, page <= 1, false);
                     let start = Math.max(1, page - Math.floor(maxVisible / 2));
                     let end = Math.min(totalPages, start + maxVisible - 1);
                     start = Math.max(1, end - maxVisible + 1);
                     if (start > 1) { addPage(1, 1, false, false); if (start > 2) addPage('...', 0, true, false); }
                     for (let i = start; i <= end; i++) addPage(i, i, false, i === page);
                     if (end < totalPages) { if (end < totalPages - 1) addPage('...', 0, true, false); addPage(totalPages, totalPages, false, false); }
-                    addPage('&raquo;', page + 1, page === totalPages, false);
+                    addPage('&raquo;', page + 1, page >= totalPages, false);
 
                     // ✅ Re-bind clicks **after** DOM update
                     bindHistoryRowClicks();
