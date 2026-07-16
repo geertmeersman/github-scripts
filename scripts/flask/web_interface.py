@@ -1,11 +1,12 @@
+import json
 import os
-import sys
 import re
 import subprocess
+import sys
 import threading
 from datetime import datetime
-import json
-from flask import Flask, jsonify, render_template_string, send_file, request
+
+from flask import Flask, jsonify, render_template_string, request, send_file
 from flask_socketio import SocketIO
 
 app = Flask(__name__)
@@ -13,9 +14,7 @@ app.secret_key = os.environ.get("FLASK_SECRET_KEY", "default-secret")
 socketio = SocketIO(
     app,
     async_mode="eventlet",
-    cors_allowed_origins=os.environ.get(
-        "CORS_ALLOWED_ORIGINS"
-    )
+    cors_allowed_origins=os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",")
 )
 
 def is_safe_args(arg_list, allowed_args_config):
