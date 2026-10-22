@@ -1,22 +1,27 @@
-import json
 import datetime
-import subprocess
 import fcntl
-import sys
+import json
 import os
+import subprocess
+import sys
 
 LOG_DIR = "/var/log/github-scripts"
 HISTORY_FILE = os.path.join(LOG_DIR, "script_run_history.json")
-os.makedirs(LOG_DIR, exist_ok=True)
+
+
+def ensure_log_dir():
+    os.makedirs(LOG_DIR, exist_ok=True)
+
 
 def append_run_history(script_name, status, start_time, end_time, duration_seconds, log_filename):
+    ensure_log_dir()
     record = {
         "script": script_name,
         "start": start_time,
         "end": end_time,
         "duration": duration_seconds,
         "status": status,
-        "log_file": log_filename
+        "log_file": log_filename,
     }
     try:
         if not os.path.exists(HISTORY_FILE):
@@ -33,19 +38,22 @@ def append_run_history(script_name, status, start_time, end_time, duration_secon
             json.dump(data, f, indent=2)
             f.truncate()
             fcntl.flock(f, fcntl.LOCK_UN)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         print(f"Failed to update run history: {e}")
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
         print("Usage: wrapper.py <script_name> <script_path>")
         sys.exit(1)
 
+    ensure_log_dir()
+
     script_name = sys.argv[1]
     script_path = sys.argv[2]
 
     start_dt = datetime.datetime.now()
-    start_time = start_dt.strftime('%Y-%m-%d_%H-%M-%S')
+    start_time = start_dt.strftime("%Y-%m-%d_%H-%M-%S")
     log_filename = f"{script_name}_{start_time}.log"
     log_path = os.path.join(LOG_DIR, log_filename)
     status = "error"
@@ -58,15 +66,16 @@ if __name__ == "__main__":
                 stderr=subprocess.STDOUT,
                 text=True,
                 bufsize=1,
-                env=os.environ.copy()
+                env=os.environ.copy(),
+                check=False,
             )
             if result.returncode == 0:
                 status = "success"
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         with open(log_path, "a") as log_file:
             log_file.write(f"\nException running script: {e}\n")
 
-    end_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    end_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     end_dt = datetime.datetime.now()
     duration_seconds = (end_dt - start_dt).total_seconds()
     append_run_history(script_name, status, start_time, end_time, duration_seconds, log_filename)

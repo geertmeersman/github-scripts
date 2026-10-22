@@ -1,30 +1,29 @@
 import os
 import smtplib
-import requests
-from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+import requests
 
 # === Email Config ===
 SMTP_SERVER = os.getenv("SMTP_SERVER")
 try:
-    SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
+    SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
 except ValueError:
     print("⚠️ Invalid SMTP_PORT, using default 587")
     SMTP_PORT = 587
 SMTP_USER = os.getenv("SMTP_USER")
 SMTP_PWD = os.getenv("SMTP_PWD")
 EMAIL_FROM = os.getenv("EMAIL_FROM", SMTP_USER)
-EMAIL_TO = os.getenv("EMAIL_TO")  # Optional default recipient
+EMAIL_TO = os.getenv("EMAIL_TO")
 
 # === Telegram Config ===
 TELEGRAM_BOT_ID = os.getenv("TELEGRAM_BOT_ID")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
-TELEGRAM_WEBHOOK = (
-    f"https://api.telegram.org/bot{TELEGRAM_BOT_ID}/sendMessage" if TELEGRAM_BOT_ID else None
-)
+TELEGRAM_WEBHOOK = f"https://api.telegram.org/bot{TELEGRAM_BOT_ID}/sendMessage" if TELEGRAM_BOT_ID else None
 
 
-def send_email_report(subject: str, html_body: str, email_to: str = None):
+def send_email_report(subject: str, html_body: str, email_to: str | None = None) -> None:
     """
     Send an HTML email report.
 
@@ -50,11 +49,11 @@ def send_email_report(subject: str, html_body: str, email_to: str = None):
             server.login(SMTP_USER, SMTP_PWD)
             server.sendmail(EMAIL_FROM, recipient, msg.as_string())
         print(f"📧 Email sent to {recipient}")
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         print(f"❌ Failed to send email: {e}")
 
 
-def send_telegram_report(text: str):
+def send_telegram_report(text: str) -> None:
     """
     Send a raw text message to Telegram using Markdown formatting.
 
@@ -77,6 +76,6 @@ def send_telegram_report(text: str):
         if response.status_code == 200:
             print("📨 Telegram notification sent.")
         else:
-            raise Exception(response.text)
-    except Exception as e:
+            raise RuntimeError(response.text)
+    except Exception as e:  # noqa: BLE001
         print(f"❌ Telegram notification failed: {e}")
