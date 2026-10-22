@@ -1,57 +1,70 @@
-name: Build and Push Docker Image
+name: Release 🚀
 
-on: [workflow_dispatch]
+on:
+  workflow_dispatch:
 
 jobs:
-  build-and-push:
+  release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: 🔢 Calculate next semantic version
+        id: semver
+        uses: ietf-tools/semver-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main
+          patchAll: true
+          fallbackTag: v0.0.0
+          noVersionBumpBehavior: patch
+
+      - name: 🧾 Display version info
+        run: |
+          echo "Current version: ${{ steps.semver.outputs.current }}"
+          echo "Next version: ${{ steps.semver.outputs.next }}"
 
       - name: 🗑　Delete drafts
         uses: hugo19941994/delete-draft-releases@v3.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 📝　Draft release
-        uses: release-drafter/release-drafter@v7
-        id: release_drafter
+      - name: 🚮 Remove pre-releases
+        run: |
+          gh release list --json tagName,isPrerelease -q '.[] | select(.isPrerelease == true) | .tagName' | while read -r tag_name; do
+            echo "Deleting pre-release with tag: $tag_name"
+            gh release delete "$tag_name" --yes
+            echo "Deleting Git tag: $tag_name"
+            git push origin --delete "$tag_name" || echo "Failed to delete tag $tag_name from remote"
+            git tag -d "$tag_name" || echo "Failed to delete tag $tag_name locally"
+          done
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 🔄　Update version in 'VERSION' and push changes
-        env:
-          tag_name: ${{ steps.release_drafter.outputs.tag_name }}
-        run: echo "$tag_name" > VERSION
+      - name: Update VERSION file
+        run: echo "${{ steps.semver.outputs.next }}" > VERSION
 
-      - name: 📝　Publish release
+      - name: Publish release
         uses: release-drafter/release-drafter@v7
         id: release_published
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           publish: true
+          tag: ${{ steps.semver.outputs.next }}
+          name: ${{ steps.semver.outputs.next }}
 
-      - name: ✏️　Generate release changelog
-        uses: heinrichreimer/github-changelog-generator-action@v2.4
-        with:
-          token: ${{ secrets.GH_PAT }}
-          issues: true
-          issuesWoLabels: true
-          pullRequests: true
-          prWoLabels: true
-          unreleased: false
-          addSections: '{"documentation":{"prefix":"**Documentation:**","labels":["documentation"]}}'
-
-      - name: ✅　Commit release notes
+      - name: Commit VERSION file
         uses: EndBug/add-and-commit@v11
         with:
-          message: Commit release notes and bump version ${{ steps.release_drafter.outputs.tag_name }}
+          message: "chore: bump version to ${{ steps.semver.outputs.next }}"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -62,14 +75,14 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: 🚀 Build and push Docker image
+      - name: Build and push Docker image
         uses: docker/build-push-action@v7
         with:
           context: .
           push: true
           tags: |
             ${{ github.repository }}:latest
-            ${{ github.repository }}:${{ steps.release_drafter.outputs.tag_name }}
+            ${{ github.repository }}:${{ steps.semver.outputs.next }}
 
       - name: Update Docker Hub description
         uses: peter-evans/dockerhub-description@v5
