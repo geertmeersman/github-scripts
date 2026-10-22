@@ -1,4 +1,4 @@
-name: "Analysis - Ruff"
+name: "Analysis - Ruff & Tests"
 
 on:
   push:
@@ -17,10 +17,28 @@ jobs:
     name: "Ruff"
     runs-on: ubuntu-latest
     steps:
-      - name: "Checkout the repository"
+      - name: Checkout the repository
         uses: actions/checkout@v7
 
-      - name: "Run Ruff"
+      - name: Run Ruff
         uses: astral-sh/ruff-action@v3
         with:
           args: check .
+
+  pytest:
+    name: "Pytest"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: pip install pytest pytest-cov requests flask flask-socketio eventlet cron-descriptor
+
+      - name: Run tests
+        run: pytest tests/ -v --tb=short

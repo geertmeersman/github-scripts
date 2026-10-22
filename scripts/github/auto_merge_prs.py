@@ -1,9 +1,10 @@
-import os
-import requests
-import time
 import argparse
-from report_utils import wrap_html_report
+import os
+import time
+
+import requests
 from notify_utils import send_email_report, send_telegram_report
+from report_utils import wrap_html_report
 
 # === CONFIG ===
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
@@ -14,7 +15,7 @@ REQUESTS_TIMEOUT = 10
 HEADERS = {
     "Authorization": f"token {GITHUB_TOKEN}",
     "Accept": "application/vnd.github.v3+json",
-    "User-Agent": "github-scripts-bot"
+    "User-Agent": "github-scripts-bot",
 }
 
 if not all([GITHUB_USER, GITHUB_TOKEN]):
@@ -35,7 +36,7 @@ def get_repos():
     repos = []
     page = 1
     while True:
-        url = f'https://api.github.com/user/repos?per_page=100&page={page}'
+        url = f"https://api.github.com/user/repos?per_page=100&page={page}"
         response = requests.get(url, headers=HEADERS, timeout=REQUESTS_TIMEOUT)
         if response.status_code != 200:
             print("❌ Failed to fetch repos")
@@ -45,7 +46,7 @@ def get_repos():
             break
         repos.extend(data)
         page += 1
-    return [r['full_name'] for r in repos if r['permissions']['push']]
+    return [r["full_name"] for r in repos if r["permissions"]["push"]]
 
 
 def get_user_prs(repo, target_user):
@@ -64,7 +65,7 @@ def get_user_prs(repo, target_user):
     if response.status_code != 200:
         print(f"❌ Failed to fetch PRs for {repo}")
         return []
-    return [pr for pr in response.json() if pr['user']['login'] == target_user]
+    return [pr for pr in response.json() if pr["user"]["login"] == target_user]
 
 
 def merge_pr(repo, pr, target_user):
@@ -79,16 +80,16 @@ def merge_pr(repo, pr, target_user):
     Side Effects:
         Updates global merged_prs or unmerged_prs lists with the outcome.
     """
-    pr_number = pr['number']
-    pr_title = pr['title']
-    pr_url = pr['html_url']
+    pr_number = pr["number"]
+    pr_title = pr["title"]
+    pr_url = pr["html_url"]
     print(f"🔄 Attempting to merge PR #{pr_number} - {pr_title} in {repo}")
 
     details_url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}"
     details = requests.get(details_url, headers=HEADERS, timeout=REQUESTS_TIMEOUT).json()
 
-    if details.get('mergeable') is not True:
-        reason = details.get('mergeable_state', 'unknown')
+    if details.get("mergeable") is not True:
+        reason = details.get("mergeable_state", "unknown")
         reason_msg = "Merge conflict" if reason == "dirty" else f"Not mergeable ({reason})"
         print(f"⏭️ PR #{pr_number} is not mergeable: {reason_msg}")
         unmerged_prs.append((repo, pr_number, pr_title, pr_url, reason_msg))
@@ -97,7 +98,7 @@ def merge_pr(repo, pr, target_user):
     merge_url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}/merge"
     data = {
         "merge_method": MERGE_METHOD,
-        "commit_title": f"Auto-merge PR #{pr_number}: {pr_title}"
+        "commit_title": f"Auto-merge PR #{pr_number}: {pr_title}",
     }
     response = requests.put(merge_url, headers=HEADERS, json=data, timeout=REQUESTS_TIMEOUT)
 
@@ -105,18 +106,12 @@ def merge_pr(repo, pr, target_user):
         print(f"✅ Merged PR #{pr_number} - {pr_title} in {repo}")
         merged_prs.append((repo, pr_number, pr_title, pr_url))
     else:
-        error = response.json().get('message', 'Unknown error')
+        error = response.json().get("message", "Unknown error")
         print(f"❌ Failed to merge PR #{pr_number} - {pr_title} in {repo}: {error}")
         unmerged_prs.append((repo, pr_number, pr_title, pr_url, error))
 
 
 def build_and_send_email(user):
-    """
-    Builds an HTML report and sends it via email for merged/unmerged PRs.
-
-    Args:
-        user (str): GitHub username the report is for.
-    """
     subject = f"[Auto-Merge] {len(unmerged_prs)} unmerged, {len(merged_prs)} merged for {user}"
 
     body = ""
@@ -135,23 +130,15 @@ def build_and_send_email(user):
     if not merged_prs and not unmerged_prs:
         body = f"<p>All PRs from {user} were merged successfully! 🎉</p>"
 
-    html_report = wrap_html_report(
-        content_html=body,
-        title="Auto-Merge Report",
-        github_user=GITHUB_USER
-    )
+    html_report = wrap_html_report(content_html=body, title="Auto-Merge Report", github_user=GITHUB_USER)
     send_email_report(subject, html_report)
 
 
 def build_and_send_telegram(user):
-    """
-    Sends a summary of merged/unmerged PRs via Telegram.
-
-    Args:
-        user (str): GitHub username the report is for.
-    """
     merged = "\n".join([f"✅ [{repo}#{num}]({url}) — {title}" for repo, num, title, url in merged_prs])
-    unmerged = "\n".join([f"⚠️ [{repo}#{num}]({url}) — {title} — {reason}" for repo, num, title, url, reason in unmerged_prs])
+    unmerged = "\n".join(
+        [f"⚠️ [{repo}#{num}]({url}) — {title} — {reason}" for repo, num, title, url, reason in unmerged_prs]
+    )
 
     if not merged_prs and not unmerged_prs:
         text = f"✅ *[Auto-Merge]* All PRs from `{user}` merged\nNothing left to review."
@@ -166,17 +153,11 @@ def build_and_send_telegram(user):
 
 
 def main():
-    """
-    Main entry point for auto-merging pull requests for a specified user.
-
-    Parses CLI arguments, fetches repositories and PRs, and merges auto-mergeable PRs.
-    Sends a report via email and Telegram.
-    """
     parser = argparse.ArgumentParser(description="Auto-merge PRs for a specified user (default: dependabot[bot])")
     parser.add_argument(
-        "--user", 
+        "--user",
         default=os.getenv("AUTO_MERGE_USER", "dependabot[bot]"),
-        help="GitHub username to auto-merge PRs for"
+        help="GitHub username to auto-merge PRs for",
     )
     args = parser.parse_args()
     target_user = args.user
@@ -198,5 +179,5 @@ def main():
         print(f"📭 No PRs from {target_user} found — skipping notifications.")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

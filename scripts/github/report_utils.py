@@ -1,8 +1,7 @@
-# report_utils.py
-
-import os
 import html
+import os
 from datetime import datetime
+
 
 def wrap_html_report(content_html, title="HTML Report", github_user="GitHub User", output_path=None):
     """
@@ -18,9 +17,8 @@ def wrap_html_report(content_html, title="HTML Report", github_user="GitHub User
         str: The complete HTML report.
     """
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    # Escape user inputs to prevent XSS (except content_html which is expected to contain HTML)  
-    escaped_title = html.escape(title)  
-    escaped_github_user = html.escape(github_user)  
+    escaped_title = html.escape(title)
+    escaped_github_user = html.escape(github_user)
     html_content = f"""
     <!DOCTYPE html>
     <html>
@@ -52,7 +50,7 @@ def wrap_html_report(content_html, title="HTML Report", github_user="GitHub User
             output_dir = os.path.dirname(output_path)
             if output_dir:
                 os.makedirs(output_dir, exist_ok=True)
-            with open(output_path, 'w', encoding='utf-8') as f:
+            with open(output_path, "w", encoding="utf-8") as f:
                 f.write(html_content)
             print(f"[INFO] HTML report written to: {output_path}")
         except Exception as e:

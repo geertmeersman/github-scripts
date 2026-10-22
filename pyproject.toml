@@ -1,0 +1,40 @@
+[tool.ruff]
+target-version = "py313"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "D",       # docstring rules
+    "ANN",     # type annotation rules
+    "ERA",     # commented-out code
+    "FIX",     # fixme comments
+    "TD",      # todo comments
+    "T20",     # print statements
+    "S",       # bandit (handled separately)
+    "COM812",  # trailing comma (conflicts with formatter)
+    "ISC001",  # implicit string concat (conflicts with formatter)
+    "INP001",  # implicit namespace package
+    "PTH",     # pathlib (os.path is fine here)
+    "DTZ",     # timezone-aware datetimes
+    "PLR2004", # magic value comparisons
+    "TRY003",  # long exception messages
+    "EM101",   # string literal in exception
+    "EM102",   # f-string in exception
+    "TRY301",  # abstract raise
+    "PLR0913", # too many arguments
+    "PLW0603", # global statement
+    "PLW2901", # loop variable overwrite
+    "TRY400",  # use logging.exception
+    "G004",    # logging f-string
+    "RUF002",  # ambiguous unicode in docstring
+    "ARG001",  # unused function argument
+    "ARG002",  # unused method argument
+    "B017",    # blind exception in pytest.raises
+    "PT011",   # pytest.raises too broad
+    "SIM108",  # ternary operator
+]
+
+[tool.ruff.lint.per-file-ignores]
+"scripts/flask/web_interface.py" = ["E501"]
+"scripts/github/report_utils.py" = ["E501"]

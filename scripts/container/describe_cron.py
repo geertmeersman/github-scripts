@@ -13,28 +13,26 @@
 ╚══════════════════════════════════════════════════════════════╝
 """
 
-from cron_descriptor import get_description
 import re
+
+from cron_descriptor import get_description
 
 print("📆   Scheduled Cron Jobs:\n")
 
-with open("/etc/cron.d/github_scripts", "r") as file:
+with open("/etc/cron.d/github_scripts") as file:
     for line in file:
-        # Remove leading/trailing spaces
         line = line.strip()
 
-        # Skip comments, env vars, or empty lines
         if not line or line.startswith("#") or "=" in line:
             continue
 
-        # Match first 5 fields (cron expression)
         match = re.match(r"^(\S+\s+\S+\s+\S+\s+\S+\s+\S+)", line)
         if match:
             cron_expr = match.group(1)
             try:
                 human = get_description(cron_expr)
                 print(f"🕒   {cron_expr} → {human}")
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 print(f"⚠️   Failed to parse: {cron_expr} ({e})")
         else:
             print(f"⚠️   Skipped non-cron line: {line}")
