@@ -1,67 +1,78 @@
-name: PR - Assign and check labels
+name: PR Labeler 🏷️
+
 on:
   pull_request:
-    types:
-      - opened
-      - reopened
-      - edited
-      - synchronize
+    types: [opened, synchronize, reopened]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: pr-labeler-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 jobs:
-  assign_labels:
-    name: Assign SemVer labels
+  label:
+    name: Label PR from commits
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
     steps:
-      - name: ⤵️　Checkout code
-        uses: actions/checkout@v7
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      - name: Get commit messages
-        id: commit_messages
-        run: |
-          PR_NUMBER="${{ github.event.pull_request.number }}"
-          COMMIT_MESSAGES=$(curl -sSL -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/${{ github.repository }}/pulls/${PR_NUMBER}/commits" | \
-            jq -r '.[].commit.message')
-          echo "$COMMIT_MESSAGES" > COMMIT_MESSAGES
-          echo "$COMMIT_MESSAGES"
-
-      - name: Determine SemVer level
-        id: semver_level
-        run: |
-          labels=$(python .github/scripts/pr_extract_labels.py)
-          echo Labels: $labels
-          echo "labels=$labels" >> "$GITHUB_OUTPUT"
-
-      - name: Delete commit messages file
-        run: |
-          rm COMMIT_MESSAGES
-
-      - name: Assign SemVer label
+      - name: Apply labels based on commit types
         uses: actions/github-script@v9
         with:
           script: |
-            github.rest.issues.addLabels({
-              issue_number: context.issue.number,
+            const { data: commits } = await github.rest.pulls.listCommits({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              labels: ${{ steps.semver_level.outputs.labels }}
+              pull_number: context.issue.number,
             });
-  check_semver_labels:
-    name: Check Semver labels in PR
-    needs: assign_labels
-    runs-on: "ubuntu-latest"
-    steps:
-      - name: Check for Semver labels
-        uses: danielchabr/pr-labels-checker@v3.3
+
+            const typeToLabel = {
+              feat:     'enhancement',
+              fix:      'bug',
+              docs:     'documentation',
+              style:    'style',
+              refactor: 'refactor',
+              test:     'test',
+              chore:    'chore',
+              ci:       'ci',
+              build:    'dependencies',
+              perf:     'enhancement',
+              security: 'security',
+            };
+
+            const labels = new Set();
+            for (const { commit } of commits) {
+              const match = commit.message.match(/^(\w+)(\(.+\))?(!)?:/);
+              if (match) {
+                const type = match[1].toLowerCase();
+                if (typeToLabel[type]) labels.add(typeToLabel[type]);
+                if (match[3]) labels.add('breaking');
+              }
+            }
+
+            if (labels.size > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: [...labels],
+              });
+            }
+
+      - name: Assign PR to author
+        if: github.event.action == 'opened' && github.actor != 'dependabot[bot]'
+        uses: actions/github-script@v9
         with:
-          hasSome: major,minor,patch
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.issues.addAssignees({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              assignees: [context.payload.pull_request.user.login],
+            });
