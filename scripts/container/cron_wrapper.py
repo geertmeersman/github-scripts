@@ -7,10 +7,14 @@ import sys
 
 LOG_DIR = "/var/log/github-scripts"
 HISTORY_FILE = os.path.join(LOG_DIR, "script_run_history.json")
-os.makedirs(LOG_DIR, exist_ok=True)
+
+
+def ensure_log_dir():
+    os.makedirs(LOG_DIR, exist_ok=True)
 
 
 def append_run_history(script_name, status, start_time, end_time, duration_seconds, log_filename):
+    ensure_log_dir()
     record = {
         "script": script_name,
         "start": start_time,
@@ -42,6 +46,8 @@ if __name__ == "__main__":
     if len(sys.argv) < 3:
         print("Usage: wrapper.py <script_name> <script_path>")
         sys.exit(1)
+
+    ensure_log_dir()
 
     script_name = sys.argv[1]
     script_path = sys.argv[2]

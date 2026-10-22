@@ -23,6 +23,7 @@ ignore = [
     "EM102",   # f-string in exception
     "TRY301",  # abstract raise
     "PLR0913", # too many arguments
+    "PLR0917", # too many positional arguments
     "PLW0603", # global statement
     "PLW2901", # loop variable overwrite
     "TRY400",  # use logging.exception
@@ -33,6 +34,9 @@ ignore = [
     "B017",    # blind exception in pytest.raises
     "PT011",   # pytest.raises too broad
     "SIM108",  # ternary operator
+    "CPY001",  # missing copyright notice
+    "ICN001",  # import alias convention
+    "PERF401", # list comprehension
 ]
 
 [tool.ruff.lint.per-file-ignores]

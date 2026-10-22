@@ -29,8 +29,9 @@ class TestWrapHtmlReport:
         assert "&lt;script&gt;" in result
 
     def test_escapes_xss_in_github_user(self):
-        result = wrap_html_report("<p>x</p>", github_user="<img src=x onerror=alert(1)>")
-        assert "<img" not in result
+        result = wrap_html_report("<p>x</p>", github_user="<script>alert(1)</script>")
+        assert "<script>" not in result
+        assert "&lt;script&gt;" in result
 
     def test_writes_to_file(self):
         with tempfile.NamedTemporaryFile(suffix=".html", delete=False) as f:
@@ -40,5 +41,5 @@ class TestWrapHtmlReport:
         assert "<p>content</p>" in content
 
     def test_raises_on_unwritable_path(self):
-        with pytest.raises(Exception):
-            wrap_html_report("<p>x</p>", output_path="/nonexistent/dir/report.html")
+        with pytest.raises(OSError):
+            wrap_html_report("<p>x</p>", output_path="/proc/sys/kernel/hostname/report.html")

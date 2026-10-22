@@ -18,9 +18,6 @@ HEADERS = {
     "User-Agent": "github-scripts-bot",
 }
 
-if not all([GITHUB_USER, GITHUB_TOKEN]):
-    raise ValueError("❌ Missing one or more required environment variables.")
-
 unmerged_prs = []
 merged_prs = []
 processed_prs = []
@@ -153,6 +150,8 @@ def build_and_send_telegram(user):
 
 
 def main():
+    if not all([GITHUB_USER, GITHUB_TOKEN]):
+        raise ValueError("❌ Missing one or more required environment variables.")
     parser = argparse.ArgumentParser(description="Auto-merge PRs for a specified user (default: dependabot[bot])")
     parser.add_argument(
         "--user",

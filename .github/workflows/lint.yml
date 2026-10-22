@@ -24,6 +24,7 @@ jobs:
         uses: astral-sh/ruff-action@v3
         with:
           args: check .
+          version: "0.11.13"
 
   pytest:
     name: "Pytest"

@@ -11,9 +11,6 @@ GITHUB_USER = os.getenv("GITHUB_USER")
 
 REQUESTS_TIMEOUT = 10
 
-if not all([GITHUB_USER, GITHUB_TOKEN]):
-    raise ValueError("❌ Missing one or more required environment variables.")
-
 HEADERS = {
     "Authorization": f"token {GITHUB_TOKEN}",
     "Accept": "application/vnd.github+json",
@@ -117,6 +114,8 @@ def group_issues_by_repo_owner(issue_results):
 
 
 def main():
+    if not all([GITHUB_USER, GITHUB_TOKEN]):
+        raise ValueError("❌ Missing one or more required environment variables.")
     print(f"📡 Fetching open issues for {GITHUB_USER}...\n")
 
     categories = {

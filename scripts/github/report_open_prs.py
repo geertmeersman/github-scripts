@@ -66,6 +66,8 @@ def generate_html_report(pr_data):
 
 
 def main():
+    if not all([GITHUB_USER, GITHUB_TOKEN]):
+        raise ValueError("❌ Missing one or more required environment variables.")
     print(f"📡 Fetching open pull requests for {GITHUB_USER}...\n")
 
     categories = {
