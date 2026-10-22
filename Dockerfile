@@ -1,5 +1,5 @@
-# Use official slim Python 3.11 base image
-FROM python:3.11-slim
+# python:3.13-slim 3.13.17-slim
+FROM python:3.13-slim@sha256:57b29a7c050c4e679e4bea572e14b3965cf4b5839de2da49d55e49ffc4024f39
 
 # Install required system packages:
 RUN apt-get update && \
