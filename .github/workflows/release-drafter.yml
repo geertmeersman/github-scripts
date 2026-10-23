@@ -5,6 +5,11 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'scripts/**'
+      - 'entrypoint.sh'
+      - 'cron/**'
+      - 'requirements.txt'
   workflow_dispatch:
 
 concurrency:
