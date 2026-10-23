@@ -18,7 +18,7 @@ if not cors_env or cors_env == "*":
 else:
     cors_origins = [origin.strip() for origin in cors_env.split(",")]
 
-socketio = SocketIO(app, async_mode="eventlet", cors_allowed_origins=cors_origins)
+socketio = SocketIO(app, async_mode="gevent", cors_allowed_origins=cors_origins)
 
 
 def is_safe_args(arg_list, allowed_args_config):

@@ -4,7 +4,7 @@ FROM python:3.13-slim@sha256:57b29a7c050c4e679e4bea572e14b3965cf4b5839de2da49d55
 # Install required system packages:
 RUN apt-get update && \
     apt-get install -y cron tzdata vim-tiny curl && \
-    pip install requests cron-descriptor "gunicorn<23" flask flask-socketio eventlet && \
+    pip install requests cron-descriptor "gunicorn<23" flask flask-socketio gevent gevent-websocket && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Copy Python scripts into container

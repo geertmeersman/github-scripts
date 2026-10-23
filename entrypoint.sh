@@ -7,13 +7,13 @@ log() {
 
 
 cat << "EOF"
- _____                _    ___  ___                                         
-|  __ \              | |   |  \/  |                                         
-| |  \/ ___  ___ _ __| |_  | .  . | ___  ___ _ __ ___ _ __ ___   __ _ _ __  
-| | __ / _ \/ _ \ '__| __| | |\/| |/ _ \/ _ \ '__/ __| '_ ` _ \ / _` | '_ \ 
+ _____                _    ___  ___
+|  __ \              | |   |  \/  |
+| |  \/ ___  ___ _ __| |_  | .  . | ___  ___ _ __ ___ _ __ ___   __ _ _ __
+| | __ / _ \/ _ \ '__| __| | |\/| |/ _ \/ _ \ '__/ __| '_ ` _ \ / _` | '_ \
 | |_\ \  __/  __/ |  | |_  | |  | |  __/  __/ |  \__ \ | | | | | (_| | | | |
  \____/\___|\___|_|   \__| \_|  |_/\___|\___|_|  |___/_| |_| |_|\__,_|_| |_|
-                                                                            
+
 
 Github Scripts Docker Container
 by Geert Meersman
@@ -45,7 +45,7 @@ python3 /home/cron/describe_cron.py
 # Start Flask app
 WEB_PORT="${WEB_PORT:-80}"
 echo "[INFO] Starting Flask app on port $WEB_PORT with Gunicorn..."
-exec gunicorn --chdir /home --bind 0.0.0.0:$WEB_PORT --worker-class eventlet --timeout 120 web_interface:app
+exec gunicorn --chdir /home --bind 0.0.0.0:$WEB_PORT --worker-class gevent --timeout 120 web_interface:app
 
 # Optional: keep container running to troubleshoot, or exit
 tail -f /dev/null
