@@ -11,14 +11,19 @@
       }
     ]
   },
-    "report_open_prs": {
+  "report_open_prs": {
     "path": "/home/scripts/report_open_prs.py",
     "description": "Generates a categorized GitHub pull request report for a user and emails it as a styled HTML summary.",
     "args": []
   },
-    "report_open_issues": {
+  "report_open_issues": {
     "path": "/home/scripts/report_open_issues.py",
     "description": "Fetches and emails a report of open GitHub issues related to the user, including labels and comment counts.",
+    "args": []
+  },
+  "report_draft_releases": {
+    "path": "/home/scripts/report_draft_releases.py",
+    "description": "Scans all repositories for pending draft releases and emails a report with release notes and a trigger link.",
     "args": []
   }
 }
