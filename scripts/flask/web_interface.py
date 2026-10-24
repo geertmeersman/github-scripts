@@ -510,6 +510,8 @@ TEMPLATE = """
             <a href="https://github.com/geertmeersman/github-scripts" target="_blank" style="color: #6c757d; text-decoration: none;">
                 View on GitHub
             </a>
+            &nbsp;|&nbsp;
+            <a href="https://www.buymeacoffee.com/geertmeersman" target="_blank"><img src="https://raw.githubusercontent.com/geertmeersman/ev-charger-server/main/app/static/images/buymeacoffee.webp" style="height:14px;display:inline;vertical-align:middle;"></a>
         </div>
         <div style="margin-top: 0.25rem;">
             &copy; {{ year }} Geert Meersman
