@@ -52,14 +52,30 @@ def get_release_workflow(repo):
     return None
 
 
+def markdown_to_html(text, repo):
+    """Convert markdown to HTML using the GitHub API."""
+    response = requests.post(
+        "https://api.github.com/markdown",
+        headers=HEADERS,
+        json={"text": text, "mode": "gfm", "context": repo},
+        timeout=REQUESTS_TIMEOUT,
+    )
+    if response.status_code == 200:
+        return response.text
+    return text.replace("\n", "<br>")
+
+
 def generate_html_report(draft_releases):
     html = ""
     for repo, release, workflow in draft_releases:
         repo_name = repo.split("/")[-1]
         release_url = release["html_url"]
         tag = release.get("tag_name", "?")
-        body = release.get("body", "").strip() or "<em>No release notes yet.</em>"
-        body_html = body.replace("\n", "<br>")
+        body = release.get("body", "").strip()
+        if body:
+            body_html = markdown_to_html(body, repo)
+        else:
+            body_html = "<em>No release notes yet.</em>"
 
         trigger_html = ""
         if workflow:

@@ -78,6 +78,23 @@ class TestGetReleaseWorkflow:
         assert result is None
 
 
+class TestMarkdownToHtml:
+    def test_converts_markdown(self):
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.text = "<h2>Changes</h2>"
+        with patch("requests.post", return_value=mock_response):
+            result = report_draft_releases.markdown_to_html("## Changes", "user/repo")
+        assert result == "<h2>Changes</h2>"
+
+    def test_falls_back_on_error(self):
+        mock_response = MagicMock()
+        mock_response.status_code = 500
+        with patch("requests.post", return_value=mock_response):
+            result = report_draft_releases.markdown_to_html("line1\nline2", "user/repo")
+        assert "<br>" in result
+
+
 class TestGenerateHtmlReport:
     def setup_method(self):
         report_draft_releases.GITHUB_USER = "testuser"
