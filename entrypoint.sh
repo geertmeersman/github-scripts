@@ -45,7 +45,7 @@ python3 /home/cron/describe_cron.py
 # Start Flask app
 WEB_PORT="${WEB_PORT:-80}"
 echo "[INFO] Starting Flask app on port $WEB_PORT with Gunicorn..."
-exec gunicorn --chdir /home --bind 0.0.0.0:$WEB_PORT --worker-class gevent --timeout 120 web_interface:app
+exec gunicorn --chdir /home --bind 0.0.0.0:$WEB_PORT --worker-class geventwebsocket.gunicorn.workers.GeventWebSocketWorker --timeout 120 web_interface:app
 
 # Optional: keep container running to troubleshoot, or exit
 tail -f /dev/null
