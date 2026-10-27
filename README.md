@@ -1,4 +1,8 @@
 
+<p align="center">
+  <img src="scripts/flask/static/images/logo.png" alt="GitHub Scripts" height="120">
+</p>
+
 [![maintainer](https://img.shields.io/badge/maintainer-Geert%20Meersman-green?style=for-the-badge&logo=github)](https://github.com/geertmeersman)
 [![buyme_coffee](https://img.shields.io/badge/Buy%20me%20an%20Omer-donate-yellow?style=for-the-badge&logo=buymeacoffee)](https://www.buymeacoffee.com/geertmeersman)
 [![MIT License](https://img.shields.io/github/license/geertmeersman/github-scripts?style=for-the-badge)](https://github.com/geertmeersman/github-scripts/blob/main/LICENSE)
@@ -36,7 +40,7 @@ This container:
 * 📨 Sends **email + Telegram** notifications
 * 📌 Logs all activity to `/var/log/github-scripts/`
 
-Built and maintained by [Geert Meersman](https://github.com/gmeersman)
+Built and maintained by [Geert Meersman](https://github.com/geertmeersman)
 
 ---
 
@@ -184,6 +188,6 @@ curl http://localhost/health
 
 ## 👤 Author
 
-Geert Meersman — [@gmeersman](https://github.com/gmeersman)
+Geert Meersman — [@geertmeersman](https://github.com/geertmeersman)
 
 MIT License

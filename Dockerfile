@@ -13,7 +13,8 @@ RUN chmod +x /home/scripts/*.py
 
 COPY scripts/container/describe_cron.py /home/cron/describe_cron.py
 COPY scripts/container/cron_wrapper.py /home/cron/cron_wrapper.py
-COPY scripts/flask/web_interface.py /home/web_interface.py
+COPY scripts/flask/web_interface.py /home/flask/web_interface.py
+COPY scripts/flask/static /home/flask/static
 
 # Copy entrypoint and make it executable
 COPY entrypoint.sh /entrypoint.sh

@@ -10,7 +10,7 @@ from flask_socketio import SocketIO
 
 from flask import Flask, jsonify, render_template_string, request, send_file
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="/home/flask/static")
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "default-secret")
 cors_env = os.environ.get("CORS_ALLOWED_ORIGINS", "").strip()
 if not cors_env or cors_env == "*":
@@ -88,7 +88,7 @@ TEMPLATE = """
 <head>
     <meta charset=\"UTF-8\">
     <title>GitHub Script Dashboard</title>
-    <link rel="icon" href="https://github.githubassets.com/favicons/favicon.png" type="image/png">
+    <link rel="icon" href="/static/favicon.png" type="image/png">
     <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css\" rel=\"stylesheet\">
     <style>
         body {
@@ -148,7 +148,7 @@ TEMPLATE = """
 <body>
     <div class=\"container\">
         <h1 class="mb-4 header-title">
-            <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub" width="32" height="32">
+            <img src="/static/images/logo-119x120.png" alt="Logo" width="32" height="32">
             GitHub Script Dashboard
             <button class=\"btn btn-sm btn-secondary float-end\" onclick=\"showEnvModal()\">Show Environment</button>
         </h1>
@@ -511,7 +511,7 @@ TEMPLATE = """
                 View on GitHub
             </a>
             &nbsp;|&nbsp;
-            <a href="https://www.buymeacoffee.com/geertmeersman" target="_blank"><img src="https://raw.githubusercontent.com/geertmeersman/ev-charger-server/main/app/static/images/buymeacoffee.webp" style="height:14px;display:inline;vertical-align:middle;"></a>
+            <a href="https://www.buymeacoffee.com/geertmeersman" target="_blank"><img src="/static/buymeacoffee.webp" style="height:14px;display:inline;vertical-align:middle;"></a>
         </div>
         <div style="margin-top: 0.25rem;">
             &copy; {{ year }} Geert Meersman
