@@ -11,7 +11,7 @@ A Dockerized automation suite to manage GitHub workflows like auto-merging Depen
 | 🖥️ Web UI | Run and view scripts via browser (port 80) |
 | 🥐 Cron-Based Execution | Auto-runs at 2:00 and 6:00 UTC |
 | 🔔 Email & Telegram Alerts | Optional notifications on success/failure |
-| ❤️ Lightweight Container | Based on `python:3.13-slim` — currently pinned to `3.13.17-slim` |
+| ❤️ Lightweight Container | Based on `python:3.13-slim` — currently pinned to `3.13.18-slim` |
 
 ## Tags
 
@@ -56,7 +56,7 @@ TELEGRAM_CHAT_ID=<your-chat-id>
 
 ## Base image
 
-`python:3.13-slim` — currently pinned to `3.13.17-slim`
+`python:3.13-slim` — currently pinned to `3.13.18-slim`
 
 ## Links
 

@@ -53,7 +53,7 @@ Built and maintained by [Geert Meersman](https://github.com/geertmeersman)
 | 🖥️ Web UI                 | Run and view scripts via browser (port 80)             |
 | 🥐 Cron-Based Execution    | Auto-runs at 2:00 and 6:00 UTC                         |
 | 🔔 Email & Telegram Alerts | Optional notifications on success/failure              |
-| ❤️ Lightweight Container   | Based on `python:3.13-slim` — currently pinned to `3.13.17-slim` |
+| ❤️ Lightweight Container   | Based on `python:3.13-slim` — currently pinned to `3.13.18-slim` |
 
 ---
 
