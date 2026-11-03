@@ -36,3 +36,4 @@ jobs:
               pull_number: prs.data[0].number,
               merge_method: 'squash',
             });
+
