@@ -12,8 +12,7 @@ jobs:
       github.event.workflow_run.conclusion == 'success' &&
       (
         github.event.workflow_run.actor.login == 'github-actions[bot]' ||
-        github.event.workflow_run.actor.login == 'dependabot[bot]' ||
-        github.event.workflow_run.actor.login == 'geertmeersman'
+        github.event.workflow_run.actor.login == 'dependabot[bot]'
       )
     permissions:
       contents: write
